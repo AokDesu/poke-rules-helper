@@ -34,9 +34,12 @@ def parse_passages(text, sections):
     def flush():
         nonlocal pending
         if pending and section in sections:
+            label = f"§{section} · {heading}" + (f" / {subsection}" if subsection else "")
+            fact = re.match(r"^(?:(?:-|\d+\.) )?\*\*([^*]+?):\*\*", pending[0])
+            if fact:
+                label += " / " + fact[1]
             passages.append(Passage(
-                f"s{section.replace(' ', '-')}-l{first}", section,
-                f"§{section} · {heading}" + (f" / {subsection}" if subsection else ""),
+                f"s{section.replace(' ', '-')}-l{first}", section, label,
                 "\n".join(pending), first, first + len(pending) - 1))
         pending = []
 
@@ -64,7 +67,7 @@ def parse_passages(text, sections):
                 if section in sections:
                     passages.append(Passage(
                         f"s{section.replace(' ', '-')}-l{n}", section,
-                        f"§{section} · {heading}" + (f" / {subsection}" if subsection else ""),
+                        f"§{section} · {heading}" + (f" / {subsection}" if subsection else "") + " / " + line.split("|")[1].strip(),
                         table_header + "\n" + line, table_start, n))
         elif not line.strip():
             # A colon introduces the following list, even across a blank line.
@@ -76,6 +79,11 @@ def parse_passages(text, sections):
         elif line.startswith("```"):
             flush()
         else:
+            # Split sibling named facts, not children of an introductory list.
+            if (re.match(r"^(?:-|\d+\.) \*\*[^*]+:\*\*", line) and pending
+                    and not (pending[0].rstrip().endswith(":")
+                             and not re.match(r"^(?:-|\d+\.) ", pending[0]))):
+                flush()
             if not pending:
                 first = n
             pending.append(line)
@@ -102,6 +110,21 @@ class Rulebook:
         self.average = sum(self.lengths) / len(self.lengths)
         frequency = Counter(term for doc in self.docs for term in doc)
         self.idf = {t: math.log(1 + (len(self.docs) - n + .5) / (n + .5)) for t, n in frequency.items()}
+        self.topics = {}
+        self.topic_terms = set()
+        for passage in self.passages:
+            local = passage.label.rsplit(" / ", 1)[-1].split(" · ", 1)[-1]
+            named = re.findall(r"\*\*([^*]+?):\*\*", passage.text)
+            subject = re.match(r"(?:The )?([A-Za-z][A-Za-z -]*?)\s+(?:has|have|is|are)\b", passage.text)
+            topic = set(self.tokens(local + " " + " ".join(named)))
+            if subject:
+                topic.update(self.tokens(subject[1]))
+            self.topics[passage.id] = topic
+            # Overviews and decision/evaluation tables remain searchable, but
+            # their prose does not define the gameplay concept vocabulary.
+            if passage.section in self.policy["rule_sections"]:
+                self.topic_terms.update(topic)
+                self.topic_terms.update(self.tokens(passage.label.split(" / ", 1)[0]))
         self.ambiguities = []
         for note in self.policy["ambiguities"]:
             evidence = []
@@ -170,33 +193,63 @@ class Rulebook:
         for note, evidence in self.ambiguities:
             if set(note["all_terms"]) <= terms and set(note["any_terms"]) & terms:
                 return self.result("ambiguous", evidence, note=note["note"])
-        hits = self.search(question, 12)
-        if not hits or not terms:
-            return self.result("unsupported")
-        informational = bool(re.match(r"\s*(what|how|when|where|who|why)\b", plain))
-        candidates = []
-        for rank, passage in enumerate(hits):
+        # Query framing is not a rule concept. Derive actors from grammatical
+        # position and source names, not a blacklist of particular actor words.
+        framing = {t for t in terms if t.endswith("ly")}
+        for match in re.finditer(
+                r"\b(?:can|could|may|should|do|does|did|will|would)\s+"
+                r"((?:a|an|the|each|every|my|your)\s+)?(\w+)\s+(\w+)", plain):
+            actor = set(self.tokens(match[2]))
+            if (not actor & self.topic_terms
+                    and (match[1] or match[2] in self.stopwords or match[2].endswith("s"))):
+                framing.update(actor)
+        relation = re.match(r"\s*what\s+(\w+)\s+(\w+)", plain)
+        following = set(self.tokens(relation[2])) if relation else set()
+        if relation and (relation[2] in self.stopwords or following & self.idf.keys()):
+            framing.update(self.tokens(relation[1]))
+        for match in re.finditer(r"\b(?:is|are|was|were|been)\s+(\w+ed)\s+(?:in|at|with)\b", plain):
+            framing.update(self.tokens(match[1]))
+        if plain.lstrip().startswith("if "):
+            state = re.search(r"\b(?:is|are)\b[^,;?]*\b(\w+)\s*\??$", plain)
+            if state:
+                framing.update(self.tokens(state[1]))
+        qualifier = re.search(r"\b(?:at|on|in)\s+(\w+)\s*\??$", plain)
+        if qualifier and not set(self.tokens(qualifier[1])) & self.topic_terms:
+            framing.update(self.tokens(qualifier[1]))
+        meaningful = terms - framing
+        hits = self.search(" ".join(sorted(meaningful)), 30)
+        # A novel mechanic/asset is not supported by matching familiar resources.
+        if not meaningful or meaningful - self.idf.keys():
+            return self.result("unsupported", related=hits[:3])
+        focus = meaningful & self.topic_terms
+        quantity = re.search(
+            r"\bhow\s+(?:many|much)\s+(.+?)(?=\b(?:do|does|did|can|could|may|is|are|was|were|has|have)\b|[?]|$)",
+            plain)
+        facets = set(self.tokens(quantity[1])) - framing if quantity else set()
+        direct = bool(re.match(r"\s*(?:can|could|may|should|do|does|did)\b", plain))
+        evidence = []
+        for passage in hits:
             body = set(self.tokens(passage.text))
-            covered = terms & body
-            if not covered or passage.text.rstrip().endswith(":"):
+            context = body | set(self.tokens(passage.label))
+            local = self.topics[passage.id]
+            # A table names a particular entity; a generic Ball match cannot
+            # select every Ball type or a class that merely receives that item.
+            if passage.text.startswith("|") and not local <= meaningful:
                 continue
-            # Admission belongs to a substantive passage, never a union of
-            # disconnected paragraphs or unrelated rows in the same appendix.
-            if covered != terms:
-                minimum = 2 if informational else 3
-                if len(covered) < minimum or len(covered) * 3 < len(terms) * 2:
-                    continue
-            # Prefer stronger topic coverage over BM25's short-summary bias.
-            # Short incidental words cannot outweigh longer shared topic terms.
-            score = (len(covered), sum(len(t) for t in covered),
-                     len(terms & set(self.tokens(passage.label))) if len(terms) == 1 else 0,
-                     -rank)
-            candidates.append((score, passage))
-        if candidates:
-            _, best = max(candidates, key=lambda item: item[0])
-            # Retain the section's substantive context in source order, including
-            # both the turn stages and their budgets. Live limits still apply.
-            selected = sorted((p for _, p in candidates if p.section == best.section),
-                              key=lambda p: p.line_start)
-            return self.result("extracts", selected)
-        return self.result("unsupported", related=hits[:3])
+            anchored = bool(local & meaningful)
+            if not anchored:
+                parent = set(self.tokens(passage.label.split(" / ", 1)[0]))
+                anchored = bool(facets and parent & focus and facets <= body)
+            if (not anchored or not focus or not focus <= context
+                    or not facets <= body or direct and not meaningful <= context):
+                continue
+            evidence.append(passage)
+        if not evidence:
+            return self.result("unsupported", related=hits[:3])
+        source_ids = {p.id for p in evidence}
+        for note, sources in self.ambiguities:
+            if source_ids & {p.id for p in sources}:
+                return self.result("ambiguous", sources, note=note["note"])
+        # A bounded evidence set, not a winning overview section. Keep the
+        # retriever's order; no second score or paid selection step.
+        return self.result("extracts", evidence[:3])

@@ -1,5 +1,6 @@
 {
   "backend": "Offline extractive · no language model",
+  "rule_sections": ["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "Appendix A"],
   "max_question_length": 1200,
   "messages": {
     "extracts": "These are matching rulebook quotations, not an LLM-generated ruling. Check the conditions in each passage; a keyword match does not establish a proposed rule or calculate an outcome.",

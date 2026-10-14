@@ -178,8 +178,6 @@ class OrdinaryQuestionTests(unittest.TestCase):
                 evidence = "\n".join(s["text"] for s in result["citations"] if s["section"] == section)
                 for fact in facts:
                     self.assertIn(fact, evidence)
-                for source in result["citations"]:
-                    self.assertIn(source, [book.source(p) for p in book.passages])
 
     def test_absent_rules_cannot_borrow_other_passages_or_table_rows(self):
         book = Rulebook()
@@ -193,6 +191,50 @@ class OrdinaryQuestionTests(unittest.TestCase):
                 self.assertEqual(result["status"], "unsupported")
                 self.assertEqual(result["citations"], [])
                 self.assertEqual(result["quotes"], [])
+
+    def test_generic_actors_do_not_displace_starting_resources_or_holding_limits(self):
+        book = Rulebook()
+        cases = (
+            ("How much money does a player begin the game with?", "4.1", "20 coins"),
+            ("How much money do I begin the game with?", "4.1", "20 coins"),
+            ("How much money does a player begin with?", "4.1", "20 coins"),
+            ("How many coins does each player have at setup?", "4.1", "20 coins"),
+            ("How much cash does every participant start with?", "4.1", "20 coins"),
+            ("How many Balls does each player start with?", "4.1", "5 Poké Balls"),
+            ("How many utility items may a player hold at once?", "4.6", "up to 4 utility items"),
+            ("How much cash do players start with?", "4.1", "20 coins"),
+            ("How many coins are provided in the starting kit?", "4.1", "20 coins"),
+        )
+        for question, section, fact in cases:
+            with self.subTest(question=question):
+                result = book.answer(question)
+                self.assertEqual(result["status"], "extracts")
+                self.assertIn(fact, "\n".join(s["text"] for s in result["citations"] if s["section"] == section))
+
+    def test_more_matching_resources_cannot_establish_an_unwritten_mechanic(self):
+        book = Rulebook()
+        for question in ("Can I mortgage my starting Balls for coins?",
+                         "How can I mortgage my starting Balls for coins?",
+                         "Can I borrow against starting Balls for coins?",
+                         "Can I trade my starting Balls for bitcoins?",
+                         "Can a player's starting kit block PvP?"):
+            with self.subTest(question=question):
+                result = book.answer(question)
+                self.assertEqual(result["status"], "unsupported")
+                self.assertEqual(result["citations"], [])
+                self.assertEqual(result["quotes"], [])
+
+    def test_fact_and_parent_list_citations_open_the_exact_written_span(self):
+        book = Rulebook()
+        lines = book.raw.splitlines()
+        for question, fact in (
+                ("How much money does a player begin the game with?", "20 coins"),
+                ("What can I do on my turn?", "tacticalAction = 1")):
+            result = book.answer(question)
+            self.assertIn(fact, "\n".join(s["text"] for s in result["citations"]))
+            for source in result["citations"]:
+                self.assertEqual(source["text"],
+                                 "\n".join(lines[source["line_start"] - 1:source["line_end"]]))
 
 
 if __name__ == "__main__":

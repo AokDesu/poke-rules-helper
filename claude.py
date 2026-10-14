@@ -183,14 +183,6 @@ class Haiku:
         result = self.book.answer(question)
         if not self.api_key:
             raise LiveError("missing_key", "Live mode needs ANTHROPIC_API_KEY in the server environment or local .env. Set it privately and restart the server, or explicitly select Offline.", 503)
-        # Generic questions can retrieve a registered conflicting passage without
-        # matching the question trigger. Do not send only one side for generation.
-        if result["status"] == "extracts":
-            source_ids = {s["id"] for s in result["citations"]}
-            for note, evidence in self.book.ambiguities:
-                if source_ids & {p.id for p in evidence}:
-                    result = self.book.result("ambiguous", evidence, note=note["note"])
-                    break
         # Reuse the existing deterministic admission/retrieval policy. Never pay to
         # resolve a known conflict, fill a detected rulebook gap or expose secrets.
         if result["status"] != "extracts":
