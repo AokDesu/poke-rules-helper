@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T05:06:49Z",
+  "title": "Design System: Poke Monopoly Rules Helper",
+  "extensions": {
+    "motion": [{"name": "source-focus", "value": "180ms ease-out", "purpose": "One evidence-selection color transition; omitted under reduced motion."}],
+    "breakpoints": [{"name": "stacked", "value": "850px"}, {"name": "compact-composer", "value": "420px"}],
+    "shadows": []
+  },
+  "components": [
+    {"name": "Primary action", "kind": "button", "refersTo": "button-primary", "description": "Submit a rule question.", "html": "<button class=\"ds-primary\">Ask question</button>", "css": ".ds-primary{font:600 1rem system-ui;color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:var(--radius);padding:.55rem .85rem;min-height:44px;cursor:pointer}.ds-primary:hover:not(:disabled){background:var(--accent-hover)}.ds-primary:active:not(:disabled){background:var(--shell)}.ds-primary:focus-visible{outline:3px solid var(--citation);outline-offset:3px}.ds-primary:disabled{color:var(--muted);background:#e7edeb;cursor:not-allowed}"},
+    {"name": "Secondary action", "kind": "button", "description": "Search or retry without primary emphasis.", "html": "<button class=\"ds-secondary\">Search</button>", "css": ".ds-secondary{font:600 1rem system-ui;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:.55rem .85rem;min-height:44px;cursor:pointer}.ds-secondary:hover{background:var(--reference)}.ds-secondary:active{background:#c9dfd7}.ds-secondary:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"},
+    {"name": "Rule question", "kind": "input", "description": "Explicitly labeled multiline input.", "html": "<label class=\"ds-label\" for=\"ds-question\">Your rule question</label><textarea class=\"ds-question\" id=\"ds-question\" rows=\"3\"></textarea>", "css": ".ds-label{display:block;font:650 .875rem system-ui;color:var(--ink);margin-bottom:.45rem}.ds-question{box-sizing:border-box;width:100%;font:1rem system-ui;color:var(--ink);background:var(--paper);border:1px solid #75928d;border-radius:var(--radius);padding:.7rem .8rem;caret-color:var(--accent)}.ds-question:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"},
+    {"name": "Source disclosure", "kind": "custom", "description": "Native source navigation with line provenance.", "html": "<details class=\"ds-source\"><summary>§4.3 · Catching</summary><p>Expand the labeled source passage.</p></details>", "css": ".ds-source{font:.875rem/1.55 system-ui;color:var(--ink);border-bottom:1px solid var(--line);padding:.85rem 0}.ds-source summary{cursor:pointer;font-weight:600}.ds-source summary:hover{color:var(--accent)}.ds-source summary:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"},
+    {"name": "Source citation", "kind": "button", "description": "Opens and focuses supporting evidence.", "html": "<button class=\"ds-citation\">§4.3 · Catching · L179–181</button>", "css": ".ds-citation{font:550 .8rem system-ui;color:var(--citation);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:.4rem .65rem;min-height:44px;text-align:left;cursor:pointer}.ds-citation:hover{background:var(--reference)}.ds-citation:active{background:#c9dfd7}.ds-citation:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"}
+  ],
+  "narrative": {
+    "northStar": "Field-guide evidence",
+    "overview": "An operating surface, not a game simulation or promotional page. A petrol shell, mint reference area, and white reading area separate the jobs. Native web controls and a compact system-sans hierarchy prioritize repeat lookup under ordinary indoor study lighting.",
+    "keyCharacteristics": ["Familiar form and expandable reference list.", "Citation selection opens and focuses the exact evidence.", "Textual state labels accompany every state color."],
+    "rules": [{"name": "The Evidence Rule", "body": "Related navigation never receives the label of a supporting answer citation.", "section": "colors"}],
+    "dos": ["Do retain source labels, line spans, and textual state names.", "Do render source content with safe text nodes and limited formatting.", "Do distinguish operational errors from unsupported rules."],
+    "donts": ["Don't turn the app into a game board or invent game-state controls.", "Don't hide unresolved rules behind confident-looking success styling."]
+  }
+}
