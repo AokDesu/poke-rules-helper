@@ -5,30 +5,18 @@ primary_target: "web/index.html"
 related_targets: ["web/styles.css","web/app.js"]
 ---
 
-# Rules chat surface
-
-Mode: Operate (chat task), with a Read region for source passages. Redesign: the user rejected the field-guide look and asked for a Pokémon-themed chatbot, not a static page. Firstmate's brief substitutes for the interview (crewmate cannot address the user); interface-only scope; Flaticon Pokémon icons stored locally with attribution; no third-party runtime requests. Code-led (no image generation).
-
-Grounded candidates, resonance order: Game Boy dialogue box; Pokédex entry (literal reading); TCG card anatomy; Pokémon Center counter; Trainer Card and badge case; Game Boy instruction booklet; Kanto Town Map and route signposts. Seed 0ca0f043 assigns candidate 7: Town Map and route signposts.
-
-Challenger verdicts (audience identification / product clarity) and raises:
-- Vertical video feed: declined / declined. Raise: the next questions are already waiting under the welcome message.
-- Terminal yellow wayfinding: declined / competitive. Raise: the followed citation stays marked on the map until another is chosen.
-- Dark developer console: declined / declined. Raise: Clear conversation sits apart from Send.
-- Acetate manual tab rail: declined / declined. Raise: each section stop states its passage count.
-- Jet-age ticket wallet: declined / declined. Raise: answer states are stamped on the message and never disappear.
-- Split-flap concourse: declined / declined. Raise: fixed tabular line numbers on every citation.
+Mode: Operate chat with a Read region for the rulebook index. Redesign v2 replaces the v1 Town Map world. The direction was pinned by the captain-approved DESIGN.v2.md: no concept roll or seed key exists, and no interview was run. Code-led, no comps.
 
 ## Direction contract
 
-THESIS: Asking a rule is talking to a guide who points at the signpost. Refuse the grey-bubble chatbot clone and the Pokéball costume page.
+THESIS: A Rulebook Pokédex makes asking a rule feel like consulting a handheld guide, while keeping evidence and uncertainty unmistakable.
 
-OWN-WORLD: Town Map colours: deep sea-blue shell, pale land-green conversation ground, white guide bubbles, sea-blue trainer bubbles, sand signpost citation chips with brown lettering and line numbers, town-red Send marker, Pikachu-yellow "you are here" stop. Darius Dan Pokémon icons as guide avatars that change with the answer state. System sans; 14px bubble radius, pill chips.
+OWN-WORLD: A molded red Pokédex shell frames a pale LCD screen. Pixelify names the interface; Atkinson keeps rule sentences legible. State portraits accompany explicit labels.
 
-STORY: Ask, watch the guide read the rulebook, see Claude's answer stream in, then read it checked with numbered signposts; tap a signpost to see the exact passage on the route map, or tap a suggested follow-up that builds on the conversation. Uncovered, conflict and scope answers say so plainly.
+STORY: Ask, watch the guide read, then read the verdict line first. Follow a citation into its exact source or choose an Ask next question.
 
-FIRST VIEWPORT: Sea-blue top bar: title, backend status, Rulebook map toggle. Centred conversation column with the guide's welcome and suggested questions; composer docked at the bottom with key/cost status line, Clear, textarea and red Ask. Map drawer closed until opened or a citation is tapped; side panel on desktop, sheet on mobile.
+FIRST VIEWPORT: Red header, calm conversation, Gen-1 double-border dialogue boxes with RULE GUIDE nameplate and state tab. The message bar holds only the field and yellow Ask; Clear stays in the header.
 
-FORM: Chat thread of semantic articles, streamed draft replaced by the checked answer, follow-up pills, textarea, buttons, details/summary passages grouped under section stops on a vertical route line.
+FORM: Semantic chat articles, borderless ▸ menus with a CSS triangle cursor and ↑/↓ navigation, native source details. The index is a 400px side panel at ≥1024px and a full sheet below. seed: none (direction pinned by approved DESIGN.v2.md).
 
-SIGNATURE: Tapping a signpost chip opens the route map, lights its section stop yellow, opens and focuses the exact passage; reduced motion drops the pulse and the Pokéball thinking wobble.
+SIGNATURE: Mono §4.1 L143 tags match the Rulebook index numbers exactly; one tap opens and focuses that entry. Reduced motion removes the shake, arrival and streaming blink.

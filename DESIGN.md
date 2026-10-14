@@ -1,223 +1,349 @@
 ---
-name: Poke Monopoly Rules Helper
-description: A Pokémon-flavoured rules chat whose guide points at the exact rulebook signpost
+name: "Poke Monopoly Rules Helper"
+description: "Rulebook Pokédex: a red device frame, Gen-1 dialogue boxes and exact rulebook index numbers"
 colors:
-  sea: "#1b5680"
-  sea-deep: "#123d5c"
-  sea-tint: "#e3eef6"
-  sea-text: "#eef5fa"
-  sea-muted: "#bcd4e6"
-  land: "#edf4e6"
-  land-deep: "#dbe8cf"
-  land-line: "#c3d4b4"
-  paper: "#ffffff"
-  ink: "#1b2a33"
-  muted: "#4d5f6b"
-  sign: "#f4e6bb"
-  sign-edge: "#b8933f"
-  sign-ink: "#4c3810"
-  marker: "#cc3324"
-  marker-deep: "#a3261a"
-  spark: "#f6c945"
-  warning-ink: "#6a4806"
-  warning-ground: "#fcefc7"
-  conflict-ink: "#57347f"
-  conflict-ground: "#efe6fa"
-  block-ink: "#2b5059"
-  block-ground: "#e0edef"
-  error-ink: "#8a262c"
-  error-ground: "#ffebea"
-  ok: "#7fd3a6"
+  shell: "#C8102E"
+  shell-deep: "#8E0C21"
+  on-shell: "#FFFFFF"
+  on-shell-muted: "#FFE3E7"
+  bg: "#EDF4E6"
+  surface: "#FFFFFF"
+  ink: "#1A1C22"
+  ink-muted: "#4B5160"
+  line: "#C7CFBE"
+  accent: "#C8102E"
+  accent-deep: "#8E0C21"
+  go: "#FFCB05"
+  lens: "#1F5FBF"
+  user: "#2B2F3A"
+  shell-dark: "#8E0C21"
+  shell-deep-dark: "#5E0716"
+  on-shell-dark: "#FFFFFF"
+  on-shell-muted-dark: "#FFD0D7"
+  bg-dark: "#14161B"
+  surface-dark: "#1E2128"
+  ink-dark: "#E8EAE3"
+  ink-muted-dark: "#A7ADB8"
+  line-dark: "#343843"
+  accent-dark: "#FF5A6E"
+  accent-deep-dark: "#C8102E"
+  go-dark: "#FFCB05"
+  lens-dark: "#7FB0FF"
+  user-dark: "#3A3F4C"
+  cited-ink: "#1F6B45"
+  cited-ground: "#E3F3EA"
+  uncovered-ink: "#7A4E00"
+  uncovered-ground: "#FFF1CC"
+  conflict-ink: "#5B3A8C"
+  conflict-ground: "#EEE6F8"
+  blocked-ink: "#3E4A5C"
+  blocked-ground: "#E4E8EE"
+  failed-ink: "#A3152B"
+  failed-ground: "#FDE7EA"
+  mark: "#FFE08A"
+  mark-line: "#7A4E00"
+  lens-tint: "#E6EEFA"
+  lens-tint-dark: "#243149"
+  go-hover: "#FFD83D"
+  go-disabled: "#E8D27A"
+  lamp-ready: "#3DBE6B"
+  lamp-missing: "#FFCB05"
+  lamp-failed: "#FF8A8A"
 typography:
-  title:
-    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    fontSize: "1.125rem"
+  display:
+    fontFamily: "\"Pixelify Sans\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "20px"
     fontWeight: 700
-    lineHeight: 1.2
-    letterSpacing: "-0.02em"
-  greeting:
-    fontSize: "1.25rem"
-    fontWeight: 700
-    lineHeight: 1.3
-    letterSpacing: "-0.02em"
+    lineHeight: 1.1
   body:
-    fontSize: "1rem"
+    fontFamily: "\"Atkinson Hyperlegible Next\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.55
-  passage:
-    fontSize: "0.9375rem"
-    fontWeight: 400
-    lineHeight: 1.55
+  mono:
+    fontFamily: "\"Atkinson Hyperlegible Mono\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "14px"
+    fontWeight: 500
+    lineHeight: 1.4
+  verdict:
+    fontFamily: "\"Atkinson Hyperlegible Next\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "20px"
+    fontWeight: 600
+    lineHeight: 1.35
+  greeting:
+    fontFamily: "\"Pixelify Sans\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "24px"
+    fontWeight: 600
+    lineHeight: 1.25
+  empty-title:
+    fontFamily: "\"Pixelify Sans\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "32px"
+    fontWeight: 600
+    lineHeight: 1.1
   label:
-    fontSize: "0.8125rem"
-    fontWeight: 650
-    lineHeight: 1.3
-  fine:
-    fontSize: "0.75rem"
-    fontWeight: 400
-    lineHeight: 1.5
+    fontFamily: "\"Atkinson Hyperlegible Next\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "14px"
+    fontWeight: 700
+    lineHeight: 1.4
+  meta:
+    fontFamily: "\"Atkinson Hyperlegible Mono\", \"Noto Sans Thai\", \"Leelawadee UI\", system-ui, sans-serif"
+    fontSize: "12px"
+    fontWeight: 500
+    lineHeight: 1.4
 rounded:
-  bubble: "14px"
+  dialogue: "12px"
+  nameplate: "6px"
+  tag: "6px"
+  field: "10px"
+  ask: "28px"
+  bubble: "12px"
   bubble-tail: "4px"
-  control: "10px"
-  quote: "12px"
-  stop: "4px"
-  pill: "999px"
+  row: "8px"
 spacing:
-  tight: "8px"
-  group: "12px"
-  message: "20px"
-  column: "820px"
+  gap-8: "8px"
+  gap-12: "12px"
+  gap-16: "16px"
+  gap-20: "20px"
+  gap-28: "28px"
+  thread: "720px"
+  box: "640px"
+  bubble: "520px"
+  index: "400px"
 components:
-  bubble-guide:
-    backgroundColor: "{colors.paper}"
+  dialogue-box:
+    backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.dialogue}"
+    padding: "16px 20px"
+    width: "{spacing.box}"
+  nameplate:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.surface}"
+    rounded: "{rounded.nameplate}"
+    padding: "4px 10px"
+  state-label:
+    backgroundColor: "{colors.cited-ground}"
+    textColor: "{colors.cited-ink}"
+    typography: "{typography.label}"
+    rounded: "{rounded.nameplate}"
+    padding: "2px 10px 4px"
+  citation-tag:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.lens}"
+    typography: "{typography.mono}"
+    rounded: "{rounded.tag}"
+    padding: "0 6px"
+  question-bubble:
+    backgroundColor: "{colors.user}"
+    textColor: "{colors.on-shell}"
+    typography: "{typography.body}"
     rounded: "{rounded.bubble}"
-    padding: "0.9rem 1.1rem"
-  bubble-trainer:
-    backgroundColor: "{colors.sea}"
-    textColor: "{colors.sea-text}"
-    rounded: "{rounded.bubble}"
-    padding: "0.7rem 1rem"
-  button-send:
-    backgroundColor: "{colors.marker}"
-    textColor: "{colors.paper}"
-    rounded: "{rounded.bubble}"
-    height: "52px"
-  button-send-hover:
-    backgroundColor: "{colors.marker-deep}"
-    textColor: "{colors.paper}"
-  chip-signpost:
-    backgroundColor: "{colors.sign}"
-    textColor: "{colors.sign-ink}"
-    rounded: "{rounded.pill}"
-    padding: "0.35rem 0.85rem 0.35rem 0.6rem"
-  chip-follow-up:
-    backgroundColor: "{colors.sea-tint}"
-    textColor: "{colors.sea-deep}"
-    rounded: "{rounded.pill}"
-    padding: "0.4rem 0.9rem"
-  stamp-default:
-    backgroundColor: "{colors.sea-tint}"
-    textColor: "{colors.sea-deep}"
-    rounded: "{rounded.pill}"
-  topbar:
-    backgroundColor: "{colors.sea}"
-    textColor: "{colors.sea-text}"
+    padding: "10px 16px"
+    width: "{spacing.bubble}"
+  ask-button:
+    backgroundColor: "{colors.go}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.ask}"
+    padding: "0"
+    height: "56px"
+    width: "56px"
+  ask-button-hover:
+    backgroundColor: "{colors.go-hover}"
+  ask-button-disabled:
+    backgroundColor: "{colors.go-disabled}"
+    textColor: "{colors.mark-line}"
+  message-field:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.field}"
+    padding: "14px 16px"
+    height: "56px"
+  menu-item:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.row}"
+    padding: "10px 8px 10px 30px"
+  shell-button:
+    backgroundColor: "transparent"
+    textColor: "{colors.on-shell}"
+    rounded: "{rounded.field}"
+    padding: "0 14px"
 ---
+# Poke Monopoly Rules Helper — Design Direction (v2)
 
-# Design System: Poke Monopoly Rules Helper
+## Concept
 
-## Overview
+"Rulebook Pokédex."
 
-**Creative North Star: "The Town Map guide"**
+A handheld Pokédex you ask about Poke Monopoly's rules. The red device frames a calm screen; the rule guide answers in Gen-1 dialogue boxes, and every rule it quotes carries the same number as its entry in the rulebook index, so a player (or an examiner watching the demo) sees at a glance what the rulebook backs and what it doesn't.
 
-A rules chat set in the colours of a Pokémon region map. The sea-blue shell frames a pale land-green conversation ground. White guide bubbles carry the answers and sea-blue trainer bubbles carry the questions. Rulebook citations are sand-coloured signposts. A guide portrait from one Flaticon pack (Darius Dan, lineal colour) changes with the answer state. Pokéball means reading the rulebook or a failed answer, Pikachu means Claude is answering or answered with citations, Psyduck means an answer with no rulebook citation, Ditto means an unresolved conflict and Snorlax means a scope or privacy block. Every state is also named in text.
+Direction: Retro-futurism / Y2K, adapted to the late-1990s Pokémon handheld: molded Pokédex-red plastic instead of chrome, a pale Game Boy LCD screen instead of neon on black, pixel display type only for nameplates and menus, and a hyperlegible face for every rule sentence. No gradients, glows or chrome.
 
-This is an Operate surface: a familiar chat layout comes first. The world supplies only colour, the portraits, the signpost chips and one signature move, the route map. Tapping a signpost opens the Rulebook map, lights its section stop in Pikachu yellow, and opens and focuses the exact passage.
+Changed from v1: replaced. "The Town Map guide" (sea blue #1b5680, land green, sand signposts, system-ui) did not read as Pokémon, and its answer states shared similar warm stamps.
 
-**Key Characteristics:**
-- Conversation thread with a composer docked at the bottom; the newest message is kept in view.
-- Sources ride on the answer they support, as signposts with tabular line numbers.
-- The rulebook map stays a click away and never dominates the page.
-- State stamps (pill headings) and portraits name every answer state; colour never carries it alone.
+Fixed: the five Darius Dan Flaticon portraits (Poké Ball, Pikachu, Psyduck, Ditto, Snorlax) and what each means, and the Poké Ball app mark. No official brand assets exist.
 
-## Colors
+Surfaces:
+- Chat (signature): playful device frame, calm readable screen, medium density. The newest answer's verdict line leads.
+- Rulebook index (drawer): denser reference, a Pokédex list. The search field and the selected entry lead.
 
-A committed map palette: sea for the shell and the trainer, land for the ground, sand for signposts, town red for the one primary action, and Pikachu yellow for "you are here".
+## Color Tokens
 
-### Primary
-- **Map Sea** (#1b5680): top bar, trainer bubbles, focus rings, stop outlines, suggestion labels.
-- **Town Marker Red** (#cc3324): the Ask button only. Deepens to #a3261a on hover.
+Strategy: committed. Pokédex red owns the frame (header and dock, about 30% of the viewport); the screen stays quiet so rule text reads.
 
-### Secondary
-- **Signpost Sand** (#f4e6bb, edge #b8933f, lettering #4c3810): citation chips and their post dot.
-- **Pikachu Spark** (#f6c945): current route stop, selected passage outline, map toggle mark, text selection.
+| Token | Light | Dark | Use |
+| --- | --- | --- | --- |
+| `--shell` | `#C8102E` | `#8E0C21` | Header and dock frame (the brand accent) |
+| `--shell-deep` | `#8E0C21` | `#5E0716` | Hinge line under the header and above the dock; pressed states |
+| `--on-shell` | `#FFFFFF` | `#FFFFFF` | Wordmark and labels on the shell (5.88:1) |
+| `--on-shell-muted` | `#FFE3E7` | `#FFD0D7` | Secondary shell text (4.87:1) |
+| `--bg` | `#EDF4E6` | `#14161B` | Screen ground behind the thread |
+| `--surface` | `#FFFFFF` | `#1E2128` | Dialogue boxes, input field, index panel |
+| `--ink` | `#1A1C22` | `#E8EAE3` | Body text and the dialogue-box double border |
+| `--ink-muted` | `#4B5160` | `#A7ADB8` | Secondary text (7.94:1 on white; 7.14:1 dark) |
+| `--line` | `#C7CFBE` | `#343843` | Hairlines on the screen |
+| `--accent` | `#C8102E` | `#FF5A6E` | Brand only: frame, app-mark ring, active index section |
+| `--accent-deep` | `#8E0C21` | `#C8102E` | Accent hover and pressed |
+| `--go` | `#FFCB05` | `#FFCB05` | The Ask button only, with ink text (11.19:1); 3.87:1 against the red shell |
+| `--lens` | `#1F5FBF` | `#7FB0FF` | Interaction: focus ring (2px plus 2px offset), citation tags, links, menu cursor (6.09:1 on white) |
+| `--user` | `#2B2F3A` | `#3A3F4C` | Your question bubbles, white text (13.37:1) |
 
-### Tertiary (state grounds)
-- **Uncited** amber (#6a4806 on #fcefc7): no-citation stamp, uncited generated text, the unverified note.
-- **Conflict** violet (#57347f on #efe6fa): conflict stamp and editorial note.
-- **Blocked** slate teal (#2b5059 on #e0edef): scope and privacy stamps.
-- **Error** red (#8a262c on #ffebea): operational failures and retry.
+Status colors map to the app's real answer states. Each has a portrait, a label and a color; color is never the only signal.
 
-### Neutral
-- **Land** (#edf4e6): conversation ground. Land line (#c3d4b4) draws bubble and dock borders.
-- **Paper** (#ffffff): guide bubbles, dock, inputs.
-- **Ink** (#1b2a33) for body text; **Muted** (#4d5f6b) for secondary text on white or land.
+| State | Portrait | Label | Ink / ground |
+| --- | --- | --- | --- |
+| Answered from the rulebook | Pikachu | "From the rulebook" | `#1F6B45` / `#E3F3EA` (5.63:1) |
+| Not in the rulebook | Psyduck | "Not in the rulebook" | `#7A4E00` / `#FFF1CC` (6.41:1) |
+| Unverified sentence inside an answer | — | "No source" tag after the sentence | ink on mark `#FFE08A` (13.2:1), dotted underline `#7A4E00` |
+| Rules conflict | Ditto | "Rules conflict" | `#5B3A8C` / `#EEE6F8` (7.13:1) |
+| Blocked (scope or hidden information) | Snorlax | "Can't help with that" | `#3E4A5C` / `#E4E8EE` (7.3:1) |
+| Failed or withdrawn | Poké Ball (open) | "No answer this time" | `#A3152B` / `#FDE7EA` (6.59:1) |
+| Thinking, then streaming | Poké Ball (shaking), then Pikachu | "Reading the rulebook…", then "Answering…" | ink on surface |
 
-### Named Rules
-**The Evidence Rule.** Only supporting citations wear filled signposts. Follow-up suggestions are sea-tint question pills, never sources.
-
-**The One Red Rule.** Town Marker Red belongs to Ask. Errors use the separate error ink/ground pair.
+Header status lamp: ready `#3DBE6B`, key missing `#FFCB05`, failed `#FF8A8A`, always followed by a text label.
 
 ## Typography
 
-**Body Font:** system-ui stack (no web fonts; no third-party requests).
+All fonts are self-hosted as woff2 in `web/fonts/` with their OFL.txt; the page makes no third-party requests.
 
-**Character:** A workhorse UI sans with a firm weight ladder, sized for reading rules in a chat.
+- Display: **Pixelify Sans** 600/700 (OFL). Only the wordmark, the speaker nameplate on each box, menu headings, the Ask label and the index title. Never rule text.
+- Body: **Atkinson Hyperlegible Next** 400/600/700 (OFL). Rule text is full of look-alike characters ("1–3 AI", "Il", "0/O"), and this face was designed to keep them distinct.
+- Mono / numeric: **Atkinson Hyperlegible Mono** 500 (OFL). Citation numbers (`§4.1 L143`) and token counts.
+- Script coverage: all three are Latin and Latin-ext. The product promises English only, but Claude may answer in Thai, so every stack ends with `"Noto Sans Thai", "Leelawadee UI", system-ui, sans-serif`.
 
-### Hierarchy
-- **Title** (700, 1.125rem, 1.2, -0.02em): app name in the top bar; "Rules Helper" at 450 in Sea Muted.
-- **Greeting** (700, 1.25rem, 1.3): the guide's welcome heading.
-- **Body** (400, 1rem, 1.55): generated explanations and trainer questions, max about 66ch.
-- **Passage** (400, 0.9375rem): quoted rule text in answers; 0.875rem inside the map.
-- **Label** (650–700, 0.8125rem): stamps, stop names, chip text.
-- **Fine** (0.75rem): help line, answer meta (backend · method · tokens), credits. Never below 12px.
+Scale (px / line height):
+- 12 / 1.4: meta (mono) and credits; never smaller.
+- 14 / 1.4: nameplates, state labels, tags, menu headings.
+- 16 / 1.55: body, questions, menu items (the mobile minimum).
+- 20 / 1.35: the answer verdict line (600).
+- 24 / 1.25: the welcome greeting (Pixelify 600).
+- 32 / 1.1: the wide-screen empty-state title only.
 
-Line numbers in chips, stop counts and map entries use tabular numerals.
+Max line length 64ch. Sentence case everywhere; uppercase only in the 14px Pixelify nameplate (the games' convention), letter-spacing 0.04em.
 
-## Layout
+Formats: thousands separators ("4,483"); line spans with an en dash ("L149–157"); Appendix A tags as `§A`; coins as "20 coins", the rulebook's own unit.
 
-Full-height app shell (100dvh): top bar, then a stage. The conversation column is centred at 820px max with clamp(1rem, 3vw, 2rem) gutters. The thread scrolls on its own; the document never scrolls. The dock spans the column under a 1px land-line rule.
+## Shape, Depth, and Motion
 
-Guide messages are a two-column grid: a 44px portrait, then the bubble. Trainer messages align right, at most min(560px, 85%). Messages are 20px apart.
+- Dialogue box (guide replies): `border: 6px double #1A1C22`, radius 12px, padding 16px 20px, white. The Gen-1 text box.
+- Nameplate: a tab on the box's top-left edge, `#1A1C22` fill, white Pixelify 14px, radius 6px 6px 0 0, padding 4px 10px.
+- Your question bubble: `#2B2F3A`, white text, radius 12px with 4px on the bottom-right, no border.
+- Citation tag: 1px `#1F5FBF` border, radius 6px, white fill, mono 14px `#1F5FBF`; 44px hit area.
+- Input field: radius 10px, 2px `#8E0C21` border, white, on the shell.
+- Ask button: 56×56px desktop, 48×48px mobile, radius 28px, `#FFCB05`, 2px `#1A1C22` ring, "Ask" in Pixelify 600 16px.
+- ▸ menus: no border or fill; 44px rows; the cursor is a CSS-drawn triangle, never a Unicode ▶ glyph that can render as emoji.
+- Shadows: none on the screen. Shell only: header `box-shadow: 0 3px 0 #8E0C21`; dock `box-shadow: 0 -3px 0 #8E0C21`.
+- Motion: message arrive 200ms `cubic-bezier(.16, 1, .3, 1)` from 4px below; Poké Ball shake 3× over 1.2s `cubic-bezier(.45, 0, .55, 1)` then 0.6s rest; ▼ cursor blink 1s `steps(2)` while streaming; menu cursor move 120ms ease-out; index entry focus outline 160ms ease-out. Under `prefers-reduced-motion: reduce` there is no shake, blink or arrive motion; state text carries everything.
+- Icons: the five Darius Dan lineal-colour PNGs as 48px portraits (40px below 768px) in a 2px `#1A1C22` circle; UI glyphs (▸ ▼ ×) drawn in CSS.
 
-The Rulebook map opens as a right column, minmax(360px, 30vw), at 1024px and wider. Below that it becomes a full-screen sheet, and the conversation is made inert while it is open. At 560px and below the portrait shrinks to 34px, the toggle reads "Map", Clear reads "Clear", and the long help line is dropped from view (still referenced by aria-describedby).
+## Signature Details
 
-## Elevation & Depth
+1. **Gen-1 dialogue box** for every guide reply, with the "RULE GUIDE" nameplate and a blinking ▼ at bottom-right while text streams.
+2. **▸ menu** for the welcome starters and the "Ask next" follow-ups, like the battle menu: ↑/↓ moves the cursor inside it, Enter asks.
+3. **Index numbers**: every quoted rule carries a `§4.1 L143` mono tag that matches its Rulebook index entry exactly, so the source is one tap and one glance away.
 
-Flat, layered by tone and 1px lines. The one shadow is the portrait lift (`0 1px 3px rgba(18, 61, 92, .18)`), which separates the round icon from the land ground. Bubbles, dock and map use borders only.
+## Screens
 
-## Shapes
+### Chat: answer (signature screen)
 
-Speech bubbles use a 14px radius with a 4px tail corner on the speaker's side. Controls and inputs use 10px; quotations 12px. Chips and stamps are pills. Route stops are 4px-rounded squares on a 4px sand rail.
+Inside the dialogue box, top to bottom:
+1. "RULE GUIDE" nameplate on the box edge, the Pikachu portrait outside the box, and the green "From the rulebook" label beside the nameplate.
+2. Verdict line, 20px/600: Claude's first sentence, the direct answer. Example: "Each player starts with 20 coins."
+3. Explanation, 16px: the remaining sentences. Each cited sentence ends with its tag(s), such as `§4.1 L143`. An uncited sentence gets the `#FFE08A` mark, a dotted underline and a "No source" tag.
+4. "From the rulebook" list, at most 3 rows visible, then "Show 2 more": tag, short label and the quoted line. Example: `§4.1 L143` · Starting kit · "20 coins, the class Starter, 5 Poké Balls and 1 class item."
+5. ▸ "Ask next" menu with Claude's three suggested questions.
+6. Meta, 12px mono, one line, on Claude answers only: "Haiku 5.5 · 4,381 in · 237 out".
 
-## Components
+Primary action: open a source (a tag or row opens the Rulebook index on that entry). Secondary: ask next.
 
-### Composer dock
-- A status line states the key and cost truth (red when the key is missing, with setup steps) beside a quiet Clear button that sits apart from Ask. Then an auto-growing textarea (52–220px) and the red Ask button.
-- Enter sends; Shift+Enter adds a newline. While answering, the question, suggestions and follow-ups lock, and the button reads "Answering…".
+Streaming: the box appears with the shaking Poké Ball and "Reading the rulebook…". When text arrives the portrait becomes Pikachu, the label reads "Answering…", text grows behind the ▼ cursor, and "Sources are checked when the answer finishes" sits under it. A checked answer swaps the tags in place; a failed check turns the box into the failed state and keeps the question in the input.
 
-### Thinking and streaming messages
-- First a guide bubble with the Pokéball portrait and a CSS Pokéball, "Reading the rulebook…". Both wobble like a catch attempt (1.6s, rotate ±16°) when reduced motion is not requested.
-- When text arrives it becomes a Pikachu bubble stamped "Claude is answering…", with the text growing behind a sea-blue block caret (blinking only without reduced motion) and the note "Citations are checked when the answer finishes."
-- The checked answer replaces the draft in place. A failed check replaces it with an error bubble that leads with "Answer withdrawn:".
+Desktop: thread column at most 720px, centred; your bubbles at most 520px, right-aligned; boxes at most 640px. Mobile: full width minus 16px gutters; the 40px portrait sits above-left of the box.
 
-### Answer bubble
-- State stamp, then the generated prose, then numbered signposts, then **Ask next** follow-up pills under a 1px rule. A dashed rule precedes the meta line: policy message · backend · returned model · usage.
-- Uncited generated chunks are amber `mark`s with an explicit unverified note. Numbered sup references map only to their own chunk.
-- Guardrail answers show their message, the conflict note when there is one, and any passages as quotations with signposts; the meta line says "Local guardrail · no Claude request made".
+### Chat: rules conflict
 
-### Signpost chip
-- Sand pill with a dark post dot, the section label, and a divider before tabular "L143" or "L149–157". It opens the map and focuses the passage. The aria-label keeps the full "lines X to Y".
+Ditto portrait, violet "Rules conflict" label, one plain sentence: "The rulebook says two different things here, so I can't pick one. Ask the rule owner which applies." Then two columns at 768px and wider, stacked below that:
+- Rule A, `§4.6 L250–251`: "Blocks one whole hostile action and is then consumed."
+- Rule B, `§A L760–765`: "Blocks the next hostile item/Ability or PvP coin loss; does not stack."
 
-### Rulebook map
-- Sticky head (title, Full document, Close map), provenance, search, live count. Passages are grouped under section stops on a vertical route rail with passage counts. Each passage is a native details/summary with its sub-label (or a text preview) and its line span. The current stop fills yellow; the selected passage gets a yellow outline and a pale yellow ground. Escape closes the map and returns focus to the toggle.
+No verdict line. Meta: "Answered locally · no paid request".
 
-### Suggestions and follow-ups
-- Inside the welcome bubble: full-width outlined buttons with a small sea label and the question.
-- After an answer: sea-tint pills (#e3eef6, border #b9d2e6, text #123d5c) holding Claude's suggested questions as inert text; tapping one asks it.
+### Chat: blocked and failed
 
-## Do's and Don'ts
+- Blocked (Snorlax, slate): one sentence of reason ("I only answer from the written rules, so I can't hand out 100 coins.") and a ▸ menu with one useful redirect ("What do I get for passing Start?"). Meta: "Answered locally · no paid request".
+- Failed (open Poké Ball, red): "No answer this time: the Claude request failed." with the reason and a "Try again" button; the question stays in the input. No partial text is left looking verified.
 
-### Do:
-- **Do** name every state in text next to its portrait and stamp colour.
-- **Do** keep sources attached to the answer they support and open them in the map, not a modal.
-- **Do** keep icons from the one stored Flaticon pack (Darius Dan, lineal colour), local under `web/icons/`, credited in the UI and README.
-- **Do** scroll only the thread; keep the top bar and dock fixed.
+### Welcome
 
-### Don't:
-- **Don't** hotlink icons or load fonts or other assets from third-party hosts.
-- **Don't** give follow-up suggestions or any non-citation the filled signpost of a supporting citation.
-- **Don't** use Town Marker Red for anything but Ask.
-- **Don't** turn the chat into a game board or invent game-state controls.
+Pikachu portrait and a "RULE GUIDE" box: "Hi! Ask me anything about Poke Monopoly's rules. I only answer from the rulebook and show where each rule comes from. A source shows where a rule is written, not that my reading of it is right." Then a ▸ menu: "How do I play this game?", "How many coins do I start with?", "Explain how combat works.", "Does Price Shield block the whole PvP action?". No category labels.
+
+When the key is missing, the welcome box becomes a failed-state box with the setup steps (put `ANTHROPIC_API_KEY` in `.env` beside `app.py`, restart).
+
+### Header and dock
+
+- Header (56px, red shell): Poké Ball mark, "Rules Helper" wordmark (Pixelify 700 20px) with "Poke Monopoly" above it at 12px. Right side: status lamp with "Ready" or "Key missing", the "Rulebook" button, and "Clear", which sits here, away from Ask, because it erases the conversation.
+- Dock (red shell): white input field (48px minimum, grows to 160px) and the yellow Ask button. Desktop only, under the field: "Enter to ask · Shift+Enter for a new line" at 12px `#FFE3E7`. Nothing else lives in the dock.
+
+### Rulebook index (drawer)
+
+At 1024px and wider, a 400px right panel and the thread narrows; below 1024px, a full-screen sheet with "Back to chat", and the thread is inert while it is open. Esc closes and returns focus to the opener.
+
+Head: "RULEBOOK" (Pixelify 600 20px), the "Full document" link, close. The search field comes first. Rows: tag, label and a one-line preview, grouped under 14px section headings in ink-muted. The selected row expands to the full passage with a 2px `#1F5FBF` outline. Provenance at the bottom: "Poke Monopoly — Specification v1.0 · baseline, not playtested".
+
+## Data Visualization
+
+No charts: the app answers questions and nothing is trended or compared over time. The only numbers are token counts (12px mono meta) and line spans (tags).
+
+## Responsive
+
+- Breakpoints: 360, 768, 1024, 1440.
+- Below 768: header 56px with the wordmark and the lamp plus "Ready"; 40px portraits; dock 72px total; help line hidden from view (kept in aria-describedby); conflict rules stacked.
+- 768–1023: thread at most 720px; the index opens as a full sheet.
+- 1024 and wider: the index is a side panel when open.
+- 1440 and wider: the thread stays at 720px.
+- Only the thread scrolls; header and dock stay fixed; the newest message stays in view unless the user scrolled up.
+- Tap targets at least 44px; mobile body text at least 16px.
+
+## Avoid
+
+Found in v1:
+- Cards nested in cards (quote cards inside the reply bubble).
+- Identical stacked cards (the four labeled starter boxes).
+- One pill shape for three meanings (state stamps, citations and follow-ups were all 999px pills).
+- Bounce-like easing on the Poké Ball wobble (detector warning).
+- A system font with no type contrast.
+- Gray text on white below 4.5:1 ("Clear conversation", `#8d9aa1`, 2.89:1).
+- Meta text that contradicts itself ("Claude · claude-haiku-5-5 · Local guardrail · no Claude request made").
+
+Standard:
+- Purple or blue gradients, glows, chrome and neon.
+- Emoji or Unicode glyphs used as icons.
+- Uppercase tracked labels beyond the nameplate.
+- The same radius or shadow on everything; everything centred.
+- Placeholder copy and fake numbers.
+- Pixel type for any sentence a player must read.
+- Turning the chat into a game board or adding game-state controls.
+- Jokes in errors or refusals (the game's own UI rule: plain tone).
+
+Realistic content: use real rulebook facts in examples and mockups, such as "Each player starts with 20 coins" (§4.1 L143), "one human against 1–3 AI opponents" (§1 L27), "Passing Start pays 5 coins" (§4.1 L145), and the Price Shield conflict (§4.6 L250–251 vs §A L760–765).
