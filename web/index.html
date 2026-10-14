@@ -4,64 +4,86 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#1b5680">
   <title>Poke Monopoly · Rules Helper</title>
+  <link rel="icon" href="/icons/pokeball.png" type="image/png">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#question">Skip to question</a>
-  <header class="app-header">
-    <div>
-      <h1>Poke Monopoly <span>Rules Helper</span></h1>
-      <p>Ask a rule question. Read the evidence.</p>
-    </div>
-    <div class="backend"><span class="status-dot" aria-hidden="true"></span><span id="backend-label">Connecting to local rulebook…</span></div>
-  </header>
-  <main class="workspace">
-    <section class="conversation" aria-labelledby="chat-heading">
-      <div class="section-heading">
-        <h2 id="chat-heading">Ask the rulebook</h2>
-        <button id="clear-chat" class="quiet" type="button" disabled>Clear conversation</button>
-      </div>
-      <div id="setup-error" role="alert" hidden></div>
-      <div class="mode-control">
-        <label for="answer-mode">Answer mode</label>
-        <select id="answer-mode" aria-describedby="mode-help" disabled>
-          <option value="offline">Offline · rulebook quotations</option>
-          <option value="live">Live · Claude Haiku 5.5</option>
-        </select>
-        <p id="mode-help" class="mode-help" role="status" aria-live="polite">Loading backend settings…</p>
-      </div>
-      <div id="empty-chat" class="welcome">
-        <h3>A rule reference, not a referee.</h3>
-        <p id="welcome-copy">Choose exact offline quotations or a Claude-generated explanation with source references. Neither mode tracks your game or fills rulebook gaps with guesses.</p>
-        <p class="sample-label">Try a demo question</p>
-        <div id="samples" class="sample-list" aria-label="Demo questions"><p class="muted">Loading questions…</p></div>
-      </div>
-      <div id="messages" aria-label="Conversation"></div>
-      <p id="chat-status" class="live-status" role="status" aria-live="polite"></p>
-      <form id="ask-form" class="composer">
-        <label for="question">Your rule question</label>
-        <textarea id="question" name="question" rows="3" maxlength="1200" placeholder="Does a failed catch still use a Ball?" required disabled></textarea>
-        <div class="composer-actions">
-          <p id="question-help">Enter to ask · Shift+Enter for a new line<br>No opponent secrets or live game data.</p>
-          <button id="ask-button" class="primary" type="submit" disabled>Ask question</button>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="/icons/pokeball.png" alt="" width="40" height="40">
+        <div>
+          <h1>Poke Monopoly <span>Rules Helper</span></h1>
+          <p class="backend"><span class="status-dot" aria-hidden="true"></span><span id="backend-label">Connecting to local rulebook…</span></p>
         </div>
-      </form>
-      <p class="fine-print">English lexical retrieval in both modes. Each question is independent; include the rule or item name. A citation locates evidence, not proof of every premise or interpretation.</p>
-    </section>
-    <aside class="reference" aria-labelledby="source-heading">
-      <div class="section-heading"><h2 id="source-heading">Source library</h2><a href="/rulebook.md" target="_blank" rel="noopener">Full document</a></div>
-      <p id="provenance" class="source-meta">Loading source provenance…</p>
-      <form id="search-form" class="source-search">
-        <label for="source-query">Search sections and passages</label>
-        <div class="search-controls"><input id="source-query" type="search" maxlength="1200" placeholder="Try catch, Gym, or Price Shield" disabled><button id="search-button" type="submit" disabled>Search</button></div>
-      </form>
-      <p id="source-status" class="source-meta" role="status" aria-live="polite">Loading passages…</p>
-      <div id="source-error" role="alert" hidden></div>
-      <div id="source-list" class="source-list"></div>
-    </aside>
-  </main>
-  <footer>Loopback-only app <span>Specification baseline · not playtested · no official affiliation</span></footer>
+      </div>
+      <div class="topbar-actions">
+        <button id="map-toggle" class="map-toggle" type="button" aria-label="Rulebook map" aria-expanded="false" aria-controls="rulebook-map"><span class="wide">Rulebook map</span><span class="narrow">Map</span></button>
+      </div>
+    </header>
+
+    <div class="stage">
+      <main class="chat" aria-labelledby="chat-heading">
+        <h2 id="chat-heading" class="visually-hidden">Conversation with the rules guide</h2>
+        <div id="thread" class="thread">
+          <div class="thread-inner">
+            <div id="setup-error" role="alert" hidden></div>
+            <article id="empty-chat" class="message guide welcome" aria-labelledby="welcome-heading">
+              <span class="avatar avatar-pikachu" aria-hidden="true"></span>
+              <div class="bubble">
+                <h3 id="welcome-heading">Hi, trainer! Ask me any Poke Monopoly rule.</h3>
+                <p id="welcome-copy">Choose exact offline quotations or a Claude-generated explanation with source references. Neither mode tracks your game or fills rulebook gaps with guesses.</p>
+                <p class="sample-label" id="sample-label">Not sure where to start? Try one of these:</p>
+                <div id="samples" class="sample-list" role="group" aria-labelledby="sample-label"><p class="muted">Loading questions…</p></div>
+              </div>
+            </article>
+            <div id="messages" aria-label="Conversation" aria-busy="false"></div>
+            <footer class="credits">Loopback-only app · Specification baseline, not playtested · No official affiliation · <a href="https://www.flaticon.com/free-icons/pokemon" title="pokemon icons" target="_blank" rel="noopener noreferrer">Pokemon icons created by Darius Dan - Flaticon</a></footer>
+          </div>
+        </div>
+
+        <div class="dock">
+          <p id="chat-status" class="visually-hidden" role="status" aria-live="polite"></p>
+          <form id="ask-form" class="composer">
+            <div class="mode-control">
+              <label for="answer-mode">Answer mode</label>
+              <select id="answer-mode" aria-describedby="mode-help" disabled>
+                <option value="offline">Offline · rulebook quotations</option>
+                <option value="live">Live · Claude Haiku 5.5</option>
+              </select>
+              <button id="clear-chat" class="quiet" type="button" aria-label="Clear conversation" disabled>Clear<span class="wide"> conversation</span></button>
+            </div>
+            <p id="mode-help" class="mode-help" role="status" aria-live="polite">Loading backend settings…</p>
+            <label for="question" class="visually-hidden">Your rule question</label>
+            <div class="input-row">
+              <textarea id="question" name="question" rows="1" maxlength="1200" placeholder="Ask a rule question" aria-describedby="question-help" required disabled></textarea>
+              <button id="ask-button" class="send" type="submit" disabled><span class="send-label">Ask</span></button>
+            </div>
+            <p id="question-help" class="composer-help">Enter to ask · Shift+Enter for a new line · No opponent secrets or live game data. English lexical retrieval in both modes; a citation locates evidence, not proof of every premise or interpretation.</p>
+          </form>
+        </div>
+      </main>
+
+      <aside id="rulebook-map" class="map" aria-labelledby="source-heading" hidden>
+        <div class="map-head">
+          <h2 id="source-heading" tabindex="-1">Rulebook map</h2>
+          <a href="/rulebook.md" target="_blank" rel="noopener">Full document</a>
+          <button id="map-close" class="map-close" type="button">Close map</button>
+        </div>
+        <p id="provenance" class="source-meta">Loading source provenance…</p>
+        <form id="search-form" class="source-search">
+          <label for="source-query">Search sections and passages</label>
+          <div class="search-controls"><input id="source-query" type="search" maxlength="1200" placeholder="Try catch, Gym, or Price Shield" disabled><button id="search-button" type="submit" disabled>Search</button></div>
+        </form>
+        <p id="source-status" class="source-meta" role="status" aria-live="polite">Loading passages…</p>
+        <div id="source-error" role="alert" hidden></div>
+        <div id="source-list" class="source-list"></div>
+      </aside>
+    </div>
+  </div>
 </body>
 </html>

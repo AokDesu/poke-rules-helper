@@ -9,6 +9,9 @@ from urllib.parse import parse_qs, urlsplit
 from claude import BACKEND, MODEL, MAX_CONTEXT_BYTES, MAX_DOCUMENTS, MAX_OUTPUT_TOKENS, Haiku, LiveError, load_api_key
 from rules import ROOT, Rulebook
 
+# Locally stored Flaticon artwork (attribution in the page footer and README); fixed allowlist.
+ICONS = {f"/icons/{name}.png" for name in ("pikachu", "pokeball", "psyduck", "snorlax", "ditto")}
+
 
 class LocalServer(ThreadingHTTPServer):
     daemon_threads = True
@@ -71,6 +74,8 @@ class Handler(BaseHTTPRequestHandler):
             filename, mime = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
                               "/styles.css": ("styles.css", "text/css")}[route.path]
             self.respond(200, (ROOT / "web" / filename).read_bytes(), mime + "; charset=utf-8")
+        elif route.path in ICONS:
+            self.respond(200, (ROOT / "web" / route.path.lstrip("/")).read_bytes(), "image/png")
         else:
             self.respond(404, {"error": "Page not found."})
 
