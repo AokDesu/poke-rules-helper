@@ -5,6 +5,7 @@ from io import BytesIO
 import json
 import os
 from pathlib import Path
+import re
 import tempfile
 from threading import Thread
 import unittest
@@ -230,6 +231,24 @@ class LiveHttpTests(unittest.TestCase):
             stub.assert_not_called()
         _, info = self.request("GET", "/api/info")
         self.assertNotIn(self.server.haiku.api_key, json.dumps(info))
+
+    def test_every_font_the_stylesheet_loads_is_served_locally_and_nothing_else_under_fonts(self):
+        fonts = re.findall(r'url\("(/fonts/[^"]+)"\)', (ROOT / "web" / "styles.css").read_text())
+        self.assertTrue(fonts)
+        for path in fonts + ["/fonts/pixelify-sans/OFL.txt", "/fonts/../app.py", "/fonts/pixelify-sans/PixelifySans-400.woff2"]:
+            connection = HTTPConnection("127.0.0.1", self.server.server_port, timeout=5)
+            try:
+                connection.request("GET", path)
+                response = connection.getresponse()
+                body = response.read()
+            finally:
+                connection.close()
+            with self.subTest(path=path):
+                if path in fonts:
+                    self.assertEqual((response.status, response.getheader("Content-Type")), (200, "font/woff2"))
+                    self.assertEqual(body[:4], b"wOF2")
+                else:
+                    self.assertEqual(response.status, 404)
 
     def test_only_a_question_and_recent_history_are_accepted(self):
         for body in ({"history": []}, {"question": "catch Ball", "mode": "offline"},

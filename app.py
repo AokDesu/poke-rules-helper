@@ -12,6 +12,12 @@ from rules import ROOT, Rulebook
 
 # Locally stored Flaticon artwork (attribution in the page and README); fixed allowlist.
 ICONS = {f"/icons/{name}.png" for name in ("pikachu", "pokeball", "psyduck", "snorlax", "ditto")}
+# Self-hosted OFL fonts (licences beside them in web/fonts/); fixed allowlist.
+FONTS = {f"/fonts/{family}/{name}.woff2" for family, names in (
+    ("pixelify-sans", ("PixelifySans-600", "PixelifySans-700")),
+    ("atkinson-hyperlegible-next", ("AtkinsonHyperlegibleNext-400", "AtkinsonHyperlegibleNext-600", "AtkinsonHyperlegibleNext-700")),
+    ("atkinson-hyperlegible-mono", ("AtkinsonHyperlegibleMono-500",)),
+) for name in names}
 SECURITY_HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
@@ -89,6 +95,8 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(200, (ROOT / "web" / filename).read_bytes(), mime + "; charset=utf-8")
         elif route.path in ICONS:
             self.respond(200, (ROOT / "web" / route.path.lstrip("/")).read_bytes(), "image/png")
+        elif route.path in FONTS:
+            self.respond(200, (ROOT / "web" / route.path.lstrip("/")).read_bytes(), "font/woff2")
         else:
             self.respond(404, {"error": "Page not found."})
 

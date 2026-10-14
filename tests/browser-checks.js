@@ -9,7 +9,8 @@ async () => {
       await new Promise((resolve) => setTimeout(resolve, 20));
     }
   };
-  await until(() => !document.querySelector("#question").disabled);
+  const key = (target, name) => target.dispatchEvent(new KeyboardEvent("keydown", { key: name, bubbles: true, cancelable: true }));
+  await until(() => !document.querySelector("#question").disabled && document.querySelector("#samples .menu-item"));
   const question = document.querySelector("#question");
   const submit = (text) => { question.value = text; document.querySelector("#ask-form").requestSubmit(); };
   const originalFetch = window.fetch;
@@ -44,10 +45,18 @@ async () => {
       { text: "Uncited rule claim", citations: [] },
       { text: "Invented reference claim", citations: ["invented-target"] },
     ],
-    follow_ups: ['What about <img src=x onerror="window.__unsafeRuleText=true">?'],
+    follow_ups: ['What about <img src=x onerror="window.__unsafeRuleText=true">?', "And a second follow-up?"],
     answer_text: "Every catch attempt uses a Ball.",
   };
   try {
+    const starters = [...document.querySelectorAll("#samples .menu-item")];
+    starters[0].focus();
+    key(starters[0], "ArrowDown");
+    assert(document.activeElement === starters[1], "Arrow down must move the menu cursor to the next question");
+    key(starters[1], "ArrowUp");
+    key(starters[0], "ArrowUp");
+    assert(document.activeElement === starters.at(-1), "Arrow up from the first question must wrap to the last");
+
     window.fetch = reply([{ type: "delta", text: "Every catch " }, "hold", { type: "delta", text: "attempt uses a Ball." }, { type: "done", result }]);
     submit("Does a failed catch still use a Ball?");
     await until(() => document.querySelector("#messages .streaming .streaming-text")?.textContent.includes("Every catch"));
@@ -60,18 +69,29 @@ async () => {
     assert(!document.querySelector("#messages .streaming"), "The streamed draft must be replaced by the checked answer");
     assert(!answer.querySelector("img, script, a"), "Generated markup must be inert text");
     assert(answer.textContent.includes("<img"), "Untrusted text must remain readable, not interpreted");
-    assert(answer.querySelectorAll(".citation").length === 1, "Invented references must not become source navigation");
+    const targets = new Set([...answer.querySelectorAll("[data-source-id]")].map((node) => node.dataset.sourceId));
+    assert(targets.size === 1 && targets.has(source.id), "Invented references must not become source navigation");
     const unverified = [...answer.querySelectorAll(".uncited-text")].map((node) => node.textContent);
     assert(unverified.includes("Uncited rule claim") && unverified.includes("Invented reference claim"), "Uncited claims must be visibly unverified");
-    const followUp = answer.querySelector(".follow-up");
-    assert(followUp && followUp.textContent.startsWith("What about <img"), "Follow-up suggestions must be inert, tappable text");
-    answer.querySelector(".citation").click();
+    assert(document.querySelector("#chat-status").textContent.includes("From the rulebook"), "The finished answer must be announced with its state");
+    const followUps = [...answer.querySelectorAll(".follow-up")];
+    assert(followUps[0] && followUps[0].textContent.startsWith("What about <img"), "Follow-up suggestions must be inert, tappable text");
+    followUps[0].focus();
+    key(followUps[0], "ArrowDown");
+    assert(document.activeElement === followUps[1], "Arrow keys must move through the follow-up menu");
+
+    const citation = answer.querySelector(".citation");
+    citation.click();
     await until(() => document.getElementById(source.id)?.open);
-    assert(document.activeElement === document.getElementById(source.id).querySelector("summary"), "Citation must focus its source");
-    document.querySelector("#map-close").click();
+    const summary = document.getElementById(source.id).querySelector("summary");
+    assert(document.activeElement === summary, "Citation must focus its source");
+    if (matchMedia("(max-width: 1023px)").matches) assert(document.querySelector(".chat").inert, "The thread must be inert behind the full-screen index");
+    key(summary, "Escape");
+    assert(document.querySelector("#rulebook").hidden, "Escape must close the index");
+    assert(document.activeElement === citation, "Closing the index must return focus to the citation that opened it");
 
     window.fetch = reply([{ type: "delta", text: "A draft that fails validation" }, { type: "error", error: "Claude returned invalid source references.", code: "invalid_citations" }]);
-    followUp.click();
+    followUps[0].click();
     await until(() => !question.disabled);
     assert(bodies.at(-1).history.length === 1 && bodies.at(-1).history[0].answer === result.answer_text, "A follow-up must carry the previous exchange");
     assert(!document.querySelector("#messages").textContent.includes("A draft that fails validation"), "A failed answer must be withdrawn, not left looking verified");
@@ -85,7 +105,7 @@ async () => {
     await until(() => !question.disabled);
     assert(bodies.at(-1).history.length === 0, "Clear must start a fresh conversation");
     document.querySelector("#clear-chat").click();
-    return { result: "passed", scenarios: ["progressive streaming with composer lock", "inert generated markup and follow-ups", "unverified uncited text", "invented citation rejection", "citation focus", "withdrawn failed answer", "follow-up history", "clear starts fresh"], paid_requests: 0 };
+    return { result: "passed", scenarios: ["menu arrow keys", "progressive streaming with composer lock", "inert generated markup and follow-ups", "unverified uncited text", "invented citation rejection", "answer announcement", "citation focus", "inert thread behind the sheet (narrow only)", "Esc returns focus to the citation", "withdrawn failed answer", "follow-up history", "clear starts fresh"], paid_requests: 0 };
   } finally {
     window.fetch = originalFetch;
     delete window.__unsafeRuleText;
