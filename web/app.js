@@ -5,11 +5,14 @@ let asking = false;
 let searching = false;
 let sourceRequest = 0;
 let questionLimit = 1200;
+let historyLimit = 3;
 let backendInfo;
+// Recent answered exchanges, sent with the next question so follow-ups make sense.
+let history = [];
 const sourceCatalog = new Map();
-const headings = { generated: "Claude explanation · review the sources", extracts: "Rulebook extracts", unsupported: "Not established by the rulebook", ambiguous: "Unresolved rule conflict", boundary: "Instructions cannot change the scope", private: "Hidden information stays private" };
+const headings = { generated: "Claude answer · review the sources", uncited: "No rulebook citation", ambiguous: "Unresolved rule conflict", boundary: "Instructions cannot change the scope", private: "Hidden information stays private" };
 // Decorative guide portraits; every state is also named in text.
-const avatars = { generated: "pikachu", extracts: "pokeball", unsupported: "psyduck", ambiguous: "ditto", boundary: "snorlax", private: "snorlax" };
+const avatars = { generated: "pikachu", uncited: "psyduck", ambiguous: "ditto", boundary: "snorlax", private: "snorlax" };
 const narrow = window.matchMedia("(max-width: 1023px)");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -53,44 +56,32 @@ function passageBody(text) {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(path, { ...options, signal: AbortSignal.timeout(path === "/api/ask" ? 45000 : 10000) });
+  const response = await fetch(path, { ...options, signal: AbortSignal.timeout(10000) });
   const body = await response.json();
   if (!response.ok) throw new Error(body.error || `Request failed (${response.status}).`);
   return body;
 }
 
-function selectedMode() {
-  return $("#answer-mode").value;
-}
-
-function updateMode() {
+function updateStatus() {
   if (!backendInfo) return;
-  const live = selectedMode() === "live";
-  const missing = live && !backendInfo.live.key_configured;
-  $("#backend-label").textContent = `${backendInfo.backends[selectedMode()]}${missing ? " · key missing" : ""}`;
+  const missing = !backendInfo.live.key_configured;
+  $("#backend-label").textContent = `${backendInfo.backend}${missing ? " · key missing" : ""}`;
   $(".backend").dataset.state = missing ? "missing" : "ready";
-  document.body.dataset.mode = selectedMode();
-  $("#mode-help").classList.toggle("missing", missing);
-  $("#mode-help").textContent = !live
-    ? "Offline quotations only. No credentials needed and no paid requests."
-    : missing
-      ? "Key missing. Set ANTHROPIC_API_KEY privately in the server environment or local .env, then restart. Nothing is sent until a key is configured."
-      : `${backendInfo.live.successful_request_seen ? "A live request succeeded in this session." : "Credential configured, not yet verified in this session."} Eligible questions send retrieved passages to Claude, up to ${backendInfo.live.max_output_tokens} output tokens. Paid requests; no automatic retries or offline fallback.`;
-  $("#welcome-copy").textContent = live
-    ? "Claude explains retrieved written rules with source references. Check the interpretation. Known conflicts and unsupported questions stay unresolved; no game state is connected."
-    : "This offline helper finds and quotes written rules. It does not generate rulings, track your game, or fill gaps with guesses.";
+  $("#live-help").classList.toggle("missing", missing);
+  $("#live-help").textContent = missing
+    ? "No Claude API key is configured, so questions cannot be answered yet. Put ANTHROPIC_API_KEY in the server environment or in .env beside app.py (see .env.example), then restart the server."
+    : `${backendInfo.live.successful_request_seen ? "Claude answered in this session." : "Key configured, not yet verified in this session."} Each question is a paid Claude request (up to ${backendInfo.live.max_output_tokens} output tokens); no automatic retries.`;
 }
 
 function updateControls() {
   $("#question").disabled = !ready || asking;
   $("#ask-button").disabled = !ready || asking;
-  $("#ask-button .send-label").textContent = asking ? (selectedMode() === "live" ? "Asking Claude…" : "Finding passages…") : "Ask";
-  $("#answer-mode").disabled = !ready || asking;
+  $("#ask-button .send-label").textContent = asking ? "Answering…" : "Ask";
   $("#clear-chat").disabled = asking || !$("#messages").childElementCount;
   $("#source-query").disabled = !ready;
   $("#search-button").disabled = !ready || searching;
   $("#search-button").textContent = searching ? "Searching…" : "Search";
-  for (const button of $("#samples").querySelectorAll("button")) button.disabled = !ready || asking;
+  for (const button of document.querySelectorAll(".suggestion, .follow-up")) button.disabled = !ready || asking;
 }
 
 function showError(container, message, retry, label = "Try again") {
@@ -233,19 +224,9 @@ function guideMessage(name, className) {
 function renderAnswer(result) {
   const { article, bubble } = guideMessage(avatars[result.status] || "pokeball", `answer ${result.status}`);
   article.dataset.status = result.status;
-  bubble.append(element("h3", headings[result.status] || "Rulebook response", "answer-heading"), element("p", result.message, "answer-message"));
-  const method = result.response_method === "claude"
-    ? `Returned model: ${result.model} · ${result.usage.input_tokens} input / ${result.usage.output_tokens} output tokens`
-    : result.response_method === "policy" ? "Local scope / evidence screening · no Claude request made" : "Exact quotations · no API request";
+  bubble.append(element("h3", headings[result.status] || "Rulebook response", "answer-heading"));
   if (result.note) bubble.append(element("p", result.note, "rule-note"));
   const citations = new Map(result.citations.map((source) => [source.id, source]));
-  for (const quote of result.quotes) {
-    const source = citations.get(quote.citation);
-    if (!source) continue;
-    const block = element("blockquote");
-    block.append(passageBody(quote.text), sourceButton(source));
-    bubble.append(block);
-  }
   if (result.segments?.length) {
     const block = element("div", undefined, "generated-answer");
     const prose = element("p", undefined, "generated-text");
@@ -262,6 +243,10 @@ function renderAnswer(result) {
       }
       // Native citation chunks can split a sentence. Keep their text contiguous,
       // but never extend a citation's support to an adjacent uncited chunk.
+      if (!numbers.length && !segment.text.trim()) {
+        prose.append(document.createTextNode(segment.text));
+        continue;
+      }
       const text = element(numbers.length ? "span" : "mark", segment.text, numbers.length ? undefined : "uncited-text");
       if (!numbers.length) {
         uncited = true;
@@ -278,36 +263,65 @@ function renderAnswer(result) {
       button.prepend(element("span", `[${number}]`, "citation-number"));
       list.append(button);
     }
-    if (list.childElementCount) {
-      block.append(element("p", "Sources for numbered text · review the interpretation", "related-heading"), list);
-    }
+    if (list.childElementCount) block.append(element("p", "Sources for numbered text · review the interpretation", "related-heading"), list);
     bubble.append(block);
-  }
-  if (result.related.length) {
-    bubble.append(element("p", "Related passages · not answer citations", "related-heading"));
-    const list = element("div", undefined, "related-list");
-    for (const source of result.related) {
-      const button = sourceButton(source);
-      button.classList.add("related");
-      button.setAttribute("aria-label", `Read related passage, not answer support: ${source.label}`);
-      list.append(button);
+  } else {
+    // A guardrail answer: the policy message, then any passages it relies on.
+    bubble.append(element("p", result.message, "guardrail-message"));
+    for (const source of result.citations) {
+      const quote = element("blockquote");
+      quote.append(passageBody(source.text), sourceButton(source));
+      bubble.append(quote);
     }
-    bubble.append(list);
   }
-  bubble.append(element("p", `${result.backend} · ${method}`, "answer-meta"));
+  if (result.follow_ups?.length) {
+    const group = element("div", undefined, "follow-ups");
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", "Suggested follow-up questions");
+    group.append(element("p", "Ask next", "follow-up-label"));
+    for (const question of result.follow_ups) {
+      const button = element("button", question, "follow-up");
+      button.type = "button";
+      button.addEventListener("click", () => ask(question));
+      group.append(button);
+    }
+    bubble.append(group);
+  }
+  const method = result.response_method === "claude"
+    ? `Returned model: ${result.model} · ${result.usage.input_tokens} input / ${result.usage.output_tokens} output tokens`
+    : "Local guardrail · no Claude request made";
+  bubble.append(element("p", result.segments?.length ? `${result.message} ${result.backend} · ${method}` : `${result.backend} · ${method}`, "answer-meta"));
   return article;
 }
 
-function pendingMessage(mode) {
-  const { article, bubble } = guideMessage(mode === "live" ? "pikachu" : "pokeball", "pending");
+function pendingMessage() {
+  const { article, bubble } = guideMessage("pokeball", "pending");
   article.setAttribute("aria-label", "Answer in progress");
   const ball = element("span", undefined, "thinking-ball");
   ball.setAttribute("aria-hidden", "true");
-  bubble.append(ball, element("span", mode === "live" ? "Checking scope and asking Claude…" : "Finding rulebook passages…", "thinking-text"));
+  bubble.append(ball, element("span", "Reading the rulebook…", "thinking-text"));
   return article;
 }
 
-async function ask(question, existingTurn) {
+function streamingMessage() {
+  const { article, bubble } = guideMessage("pikachu", "streaming");
+  article.setAttribute("aria-busy", "true");
+  const text = element("p", undefined, "generated-text streaming-text");
+  bubble.append(element("h3", "Claude is answering…", "answer-heading"), text,
+    element("p", "Citations are checked when the answer finishes.", "answer-meta"));
+  return { article, text };
+}
+
+function failureMessage(text, retry, withdrawn) {
+  const { article, bubble } = guideMessage("pokeball", withdrawn ? "error withdrawn" : "error");
+  article.setAttribute("role", "alert");
+  showError(bubble, text, retry, "Try again");
+  return article;
+}
+
+// One question: local guardrail answers arrive as JSON; Claude answers stream as
+// newline-delimited JSON events ending in a validated answer or a withdrawal.
+async function ask(question, existingTurn, priorHistory = history.slice(-historyLimit)) {
   if (!ready || asking) return;
   question = question.trim();
   if (!question || question.length > questionLimit) {
@@ -327,41 +341,82 @@ async function ask(question, existingTurn) {
     turn.querySelector(".error")?.remove();
   }
   $("#empty-chat").hidden = true;
-  const mode = selectedMode();
   asking = true;
   updateControls();
-  const pending = pendingMessage(mode);
-  turn.append(pending);
-  keepInView(pending);
-  $("#chat-status").textContent = mode === "live" ? "Checking scope and requesting Claude… A sent request may be billed even if the connection fails." : "Finding rulebook passages…";
+  let current = pendingMessage();
+  turn.append(current);
+  keepInView(current);
+  $("#chat-status").textContent = "Reading the rulebook. A sent request may be billed even if the connection fails.";
   $(".backend").dataset.state = "loading";
   $("#messages").setAttribute("aria-busy", "true");
-  let latest = pending;
-  try {
-    const result = await request("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question, mode }) });
-    latest = renderAnswer(result);
-    pending.replaceWith(latest);
-    if (result.response_method === "claude") backendInfo.live.successful_request_seen = true;
-    $("#question").value = "";
-    updateMode();
-    $("#chat-status").textContent = result.response_method === "claude" ? `${headings[result.status]}. ${result.citations.length} supporting source references.` : `${headings[result.status]}. No Claude request made.`;
-  } catch (error) {
-    const { article, bubble } = guideMessage(mode === "live" ? "pikachu" : "pokeball", "error");
-    article.setAttribute("role", "alert");
-    showError(bubble, `No ${mode === "live" ? "live" : "offline"} answer received: ${error.message}`, () => ask(question, turn), "Retry in selected mode");
-    latest = article;
-    pending.replaceWith(article);
+  const retry = () => ask(question, turn, priorHistory);
+  const fail = (message, withdrawn) => {
+    const failure = failureMessage(message, retry, withdrawn);
+    current.replaceWith(failure);
+    current = failure;
     $(".backend").dataset.state = "error";
-    $("#backend-label").textContent = `${backendInfo.backends[mode]} · request failed${mode === "live" && !backendInfo.live.key_configured ? " · key missing" : ""}`;
     $("#question").value = question;
-    $("#chat-status").textContent = `Request failed. Mode was not changed. Your question is kept.${mode === "live" ? " Retrying Live may incur another charge." : ""}`;
+    $("#chat-status").textContent = `${message} Your question is kept. Retrying sends another paid request.`;
+  };
+  const finish = (result) => {
+    const answer = renderAnswer(result);
+    current.replaceWith(answer);
+    current = answer;
+    if (result.response_method === "claude") {
+      backendInfo.live.successful_request_seen = true;
+      history = [...priorHistory, { question, answer: result.answer_text }].slice(-historyLimit);
+    }
+    $("#question").value = "";
+    updateStatus();
+    const sources = result.response_method === "claude" ? ` ${result.citations.length} cited ${result.citations.length === 1 ? "source" : "sources"}.` : " No Claude request made.";
+    $("#chat-status").textContent = `${headings[result.status]}.${sources}${result.follow_ups?.length ? " Follow-up suggestions available." : ""}`;
+  };
+  try {
+    const response = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question, history: priorHistory }), signal: AbortSignal.timeout(90000) });
+    if (!(response.headers.get("Content-Type") || "").startsWith("application/x-ndjson")) {
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || `Request failed (${response.status}).`);
+      finish(body);
+      return;
+    }
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buffer = "", stream = null, settled = false;
+    while (!settled) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += value;
+      let newline;
+      while (!settled && (newline = buffer.indexOf("\n")) >= 0) {
+        const event = JSON.parse(buffer.slice(0, newline));
+        buffer = buffer.slice(newline + 1);
+        if (event.type === "delta") {
+          if (!stream) {
+            stream = streamingMessage();
+            current.replaceWith(stream.article);
+            current = stream.article;
+            $("#chat-status").textContent = "Claude is answering.";
+          }
+          stream.text.append(document.createTextNode(event.text));
+          keepInView(current);
+        } else if (event.type === "done") {
+          settled = true;
+          finish(event.result);
+        } else if (event.type === "error") {
+          settled = true;
+          fail(`${stream ? "Answer withdrawn: " : "No answer received: "}${event.error}`, Boolean(stream));
+        }
+      }
+    }
+    if (!settled) fail(`${stream ? "Answer withdrawn: " : "No answer received: "}the connection ended before the answer was checked.`, Boolean(stream));
+  } catch (error) {
+    fail(`No answer received: ${error.message}`, false);
   } finally {
     asking = false;
     $("#messages").setAttribute("aria-busy", "false");
     updateControls();
     growComposer();
     $("#question").focus({ preventScroll: true });
-    keepInView(latest, "start");
+    keepInView(current, "start");
   }
 }
 
@@ -373,10 +428,10 @@ async function initialize() {
   try {
     const info = await request("/api/info");
     backendInfo = info;
-    $("#answer-mode").value = info.default_mode;
-    updateMode();
+    updateStatus();
     $("#provenance").textContent = `${info.provenance.title}. ${info.provenance.status}`;
     questionLimit = info.max_question_length;
+    historyLimit = info.live.max_history_turns;
     $("#question").maxLength = questionLimit;
     $("#samples").replaceChildren();
     for (const sample of info.samples) {
@@ -398,18 +453,15 @@ async function initialize() {
 }
 
 $("#ask-form").addEventListener("submit", (event) => { event.preventDefault(); ask($("#question").value); });
-$("#answer-mode").addEventListener("change", () => {
-  updateMode();
-  $("#chat-status").textContent = `Selected ${selectedMode() === "live" ? "Live Claude" : "Offline quotations"}. Previous responses are unchanged.`;
-});
 $("#question").addEventListener("input", () => { $("#question").setCustomValidity(""); growComposer(); });
 $("#question").addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); $("#ask-form").requestSubmit(); }
 });
 $("#clear-chat").addEventListener("click", () => {
   $("#messages").replaceChildren();
+  history = [];
   $("#empty-chat").hidden = false;
-  $("#chat-status").textContent = "Conversation cleared. Nothing was stored.";
+  $("#chat-status").textContent = "Conversation cleared. The next question starts fresh; nothing was stored.";
   updateControls();
   $("#question").focus();
 });

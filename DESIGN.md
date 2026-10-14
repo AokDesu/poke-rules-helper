@@ -92,10 +92,12 @@ components:
     textColor: "{colors.sign-ink}"
     rounded: "{rounded.pill}"
     padding: "0.35rem 0.85rem 0.35rem 0.6rem"
-  chip-related:
-    textColor: "{colors.muted}"
+  chip-follow-up:
+    backgroundColor: "{colors.sea-tint}"
+    textColor: "{colors.sea-deep}"
     rounded: "{rounded.pill}"
-  stamp-extracts:
+    padding: "0.4rem 0.9rem"
+  stamp-default:
     backgroundColor: "{colors.sea-tint}"
     textColor: "{colors.sea-deep}"
     rounded: "{rounded.pill}"
@@ -110,7 +112,7 @@ components:
 
 **Creative North Star: "The Town Map guide"**
 
-A rules chat set in the colours of a Pokémon region map. The sea-blue shell frames a pale land-green conversation ground. White guide bubbles carry the answers and sea-blue trainer bubbles carry the questions. Rulebook citations are sand-coloured signposts. A guide portrait from one Flaticon pack (Darius Dan, lineal colour) changes with the answer state. Pokéball means offline quotations, Pikachu means a Live Claude explanation, Psyduck means not established, Ditto means an unresolved conflict and Snorlax means a scope or privacy block. Every state is also named in text.
+A rules chat set in the colours of a Pokémon region map. The sea-blue shell frames a pale land-green conversation ground. White guide bubbles carry the answers and sea-blue trainer bubbles carry the questions. Rulebook citations are sand-coloured signposts. A guide portrait from one Flaticon pack (Darius Dan, lineal colour) changes with the answer state. Pokéball means reading the rulebook or a failed answer, Pikachu means Claude is answering or answered with citations, Psyduck means an answer with no rulebook citation, Ditto means an unresolved conflict and Snorlax means a scope or privacy block. Every state is also named in text.
 
 This is an Operate surface: a familiar chat layout comes first. The world supplies only colour, the portraits, the signpost chips and one signature move, the route map. Tapping a signpost opens the Rulebook map, lights its section stop in Pikachu yellow, and opens and focuses the exact passage.
 
@@ -133,7 +135,7 @@ A committed map palette: sea for the shell and the trainer, land for the ground,
 - **Pikachu Spark** (#f6c945): current route stop, selected passage outline, map toggle mark, text selection.
 
 ### Tertiary (state grounds)
-- **Unsupported** amber (#6a4806 on #fcefc7): not-established stamp, uncited Live text, the unverified note.
+- **Uncited** amber (#6a4806 on #fcefc7): no-citation stamp, uncited generated text, the unverified note.
 - **Conflict** violet (#57347f on #efe6fa): conflict stamp and editorial note.
 - **Blocked** slate teal (#2b5059 on #e0edef): scope and privacy stamps.
 - **Error** red (#8a262c on #ffebea): operational failures and retry.
@@ -144,7 +146,7 @@ A committed map palette: sea for the shell and the trainer, land for the ground,
 - **Ink** (#1b2a33) for body text; **Muted** (#4d5f6b) for secondary text on white or land.
 
 ### Named Rules
-**The Evidence Rule.** Only supporting citations wear filled signposts. Related navigation uses the dashed, unfilled chip under "Related passages · not answer citations".
+**The Evidence Rule.** Only supporting citations wear filled signposts. Follow-up suggestions are sea-tint question pills, never sources.
 
 **The One Red Rule.** Town Marker Red belongs to Ask. Errors use the separate error ink/ground pair.
 
@@ -159,7 +161,7 @@ A committed map palette: sea for the shell and the trainer, land for the ground,
 - **Greeting** (700, 1.25rem, 1.3): the guide's welcome heading.
 - **Body** (400, 1rem, 1.55): generated explanations and trainer questions, max about 66ch.
 - **Passage** (400, 0.9375rem): quoted rule text in answers; 0.875rem inside the map.
-- **Label** (650–700, 0.8125rem): stamps, mode label, stop names, chip text.
+- **Label** (650–700, 0.8125rem): stamps, stop names, chip text.
 - **Fine** (0.75rem): help line, answer meta (backend · method · tokens), credits. Never below 12px.
 
 Line numbers in chips, stop counts and map entries use tabular numerals.
@@ -170,7 +172,7 @@ Full-height app shell (100dvh): top bar, then a stage. The conversation column i
 
 Guide messages are a two-column grid: a 44px portrait, then the bubble. Trainer messages align right, at most min(560px, 85%). Messages are 20px apart.
 
-The Rulebook map opens as a right column, minmax(360px, 30vw), at 1024px and wider. Below that it becomes a full-screen sheet, and the conversation is made inert while it is open. At 560px and below the portrait shrinks to 34px, the mode label is visually hidden (its programmatic label stays), the toggle reads "Map" and the long help line is dropped from view (still referenced by aria-describedby).
+The Rulebook map opens as a right column, minmax(360px, 30vw), at 1024px and wider. Below that it becomes a full-screen sheet, and the conversation is made inert while it is open. At 560px and below the portrait shrinks to 34px, the toggle reads "Map", Clear reads "Clear", and the long help line is dropped from view (still referenced by aria-describedby).
 
 ## Elevation & Depth
 
@@ -183,15 +185,18 @@ Speech bubbles use a 14px radius with a 4px tail corner on the speaker's side. C
 ## Components
 
 ### Composer dock
-- Native select for Answer mode next to a quiet Clear button, which sits apart from Ask. A help line under it states the cost and credential truth for the selected mode (red when the key is missing). Then an auto-growing textarea (52–220px) and the red Ask button.
-- Enter sends; Shift+Enter adds a newline. While answering, the mode, question and samples lock, and the button reads "Finding passages…" or "Asking Claude…".
+- A status line states the key and cost truth (red when the key is missing, with setup steps) beside a quiet Clear button that sits apart from Ask. Then an auto-growing textarea (52–220px) and the red Ask button.
+- Enter sends; Shift+Enter adds a newline. While answering, the question, suggestions and follow-ups lock, and the button reads "Answering…".
 
-### Thinking message
-- A guide bubble with the mode's portrait and a CSS Pokéball. Both wobble like a catch attempt (1.6s, rotate ±16°) when reduced motion is not requested. The message is replaced in place by the answer or the error.
+### Thinking and streaming messages
+- First a guide bubble with the Pokéball portrait and a CSS Pokéball, "Reading the rulebook…". Both wobble like a catch attempt (1.6s, rotate ±16°) when reduced motion is not requested.
+- When text arrives it becomes a Pikachu bubble stamped "Claude is answering…", with the text growing behind a sea-blue block caret (blinking only without reduced motion) and the note "Citations are checked when the answer finishes."
+- The checked answer replaces the draft in place. A failed check replaces it with an error bubble that leads with "Answer withdrawn:".
 
 ### Answer bubble
-- State stamp, the policy message in muted text, then quotations or the generated prose, then sources. A dashed rule precedes the meta line: backend · method · usage.
+- State stamp, then the generated prose, then numbered signposts, then **Ask next** follow-up pills under a 1px rule. A dashed rule precedes the meta line: policy message · backend · returned model · usage.
 - Uncited generated chunks are amber `mark`s with an explicit unverified note. Numbered sup references map only to their own chunk.
+- Guardrail answers show their message, the conflict note when there is one, and any passages as quotations with signposts; the meta line says "Local guardrail · no Claude request made".
 
 ### Signpost chip
 - Sand pill with a dark post dot, the section label, and a divider before tabular "L143" or "L149–157". It opens the map and focuses the passage. The aria-label keeps the full "lines X to Y".
@@ -199,8 +204,9 @@ Speech bubbles use a 14px radius with a 4px tail corner on the speaker's side. C
 ### Rulebook map
 - Sticky head (title, Full document, Close map), provenance, search, live count. Passages are grouped under section stops on a vertical route rail with passage counts. Each passage is a native details/summary with its sub-label (or a text preview) and its line span. The current stop fills yellow; the selected passage gets a yellow outline and a pale yellow ground. Escape closes the map and returns focus to the toggle.
 
-### Suggestions
+### Suggestions and follow-ups
 - Inside the welcome bubble: full-width outlined buttons with a small sea label and the question.
+- After an answer: sea-tint pills (#e3eef6, border #b9d2e6, text #123d5c) holding Claude's suggested questions as inert text; tapping one asks it.
 
 ## Do's and Don'ts
 
@@ -212,6 +218,6 @@ Speech bubbles use a 14px radius with a 4px tail corner on the speaker's side. C
 
 ### Don't:
 - **Don't** hotlink icons or load fonts or other assets from third-party hosts.
-- **Don't** give related navigation the filled signpost of a supporting citation.
+- **Don't** give follow-up suggestions or any non-citation the filled signpost of a supporting citation.
 - **Don't** use Town Marker Red for anything but Ask.
 - **Don't** turn the chat into a game board or invent game-state controls.

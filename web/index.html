@@ -36,7 +36,7 @@
               <span class="avatar avatar-pikachu" aria-hidden="true"></span>
               <div class="bubble">
                 <h3 id="welcome-heading">Hi, trainer! Ask me any Poke Monopoly rule.</h3>
-                <p id="welcome-copy">Choose exact offline quotations or a Claude-generated explanation with source references. Neither mode tracks your game or fills rulebook gaps with guesses.</p>
+                <p id="welcome-copy">I answer with Claude Haiku 5.5 from the rulebook passages, and I cite them. Follow-up questions build on our recent chat. I won't invent rules, reveal anyone's hidden cards, or settle the Price Shield conflict.</p>
                 <p class="sample-label" id="sample-label">Not sure where to start? Try one of these:</p>
                 <div id="samples" class="sample-list" role="group" aria-labelledby="sample-label"><p class="muted">Loading questions…</p></div>
               </div>
@@ -49,21 +49,16 @@
         <div class="dock">
           <p id="chat-status" class="visually-hidden" role="status" aria-live="polite"></p>
           <form id="ask-form" class="composer">
-            <div class="mode-control">
-              <label for="answer-mode">Answer mode</label>
-              <select id="answer-mode" aria-describedby="mode-help" disabled>
-                <option value="offline">Offline · rulebook quotations</option>
-                <option value="live">Live · Claude Haiku 5.5</option>
-              </select>
+            <div class="dock-status">
+              <p id="live-help" class="live-help" role="status" aria-live="polite">Loading backend settings…</p>
               <button id="clear-chat" class="quiet" type="button" aria-label="Clear conversation" disabled>Clear<span class="wide"> conversation</span></button>
             </div>
-            <p id="mode-help" class="mode-help" role="status" aria-live="polite">Loading backend settings…</p>
             <label for="question" class="visually-hidden">Your rule question</label>
             <div class="input-row">
               <textarea id="question" name="question" rows="1" maxlength="1200" placeholder="Ask a rule question" aria-describedby="question-help" required disabled></textarea>
               <button id="ask-button" class="send" type="submit" disabled><span class="send-label">Ask</span></button>
             </div>
-            <p id="question-help" class="composer-help">Enter to ask · Shift+Enter for a new line · No opponent secrets or live game data. English lexical retrieval in both modes; a citation locates evidence, not proof of every premise or interpretation.</p>
+            <p id="question-help" class="composer-help">Enter to ask · Shift+Enter for a new line · Follow-ups use the last few answers · No opponent secrets or live game data. A citation locates evidence; it does not prove every premise or interpretation.</p>
           </form>
         </div>
       </main>

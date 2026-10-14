@@ -25,10 +25,10 @@ THESIS: Asking a rule is talking to a guide who points at the signpost. Refuse t
 
 OWN-WORLD: Town Map colours: deep sea-blue shell, pale land-green conversation ground, white guide bubbles, sea-blue trainer bubbles, sand signpost citation chips with brown lettering and line numbers, town-red Send marker, Pikachu-yellow "you are here" stop. Darius Dan Pokémon icons as guide avatars that change with the answer state. System sans; 14px bubble radius, pill chips.
 
-STORY: Choose Offline quotations or Live Claude near the composer, ask, watch the guide think, read quoted or explained rules, tap a signpost to see the exact passage on the route map. Unsupported, conflict and scope answers say so plainly.
+STORY: Ask, watch the guide read the rulebook, see Claude's answer stream in, then read it checked with numbered signposts; tap a signpost to see the exact passage on the route map, or tap a suggested follow-up that builds on the conversation. Uncovered, conflict and scope answers say so plainly.
 
-FIRST VIEWPORT: Sea-blue top bar: title, backend status, Rulebook map toggle. Centred conversation column with the guide's welcome and suggested questions; composer docked at the bottom with mode select, help line and red Send. Map drawer closed until opened or a citation is tapped; side panel on desktop, sheet on mobile.
+FIRST VIEWPORT: Sea-blue top bar: title, backend status, Rulebook map toggle. Centred conversation column with the guide's welcome and suggested questions; composer docked at the bottom with key/cost status line, Clear, textarea and red Ask. Map drawer closed until opened or a citation is tapped; side panel on desktop, sheet on mobile.
 
-FORM: Chat thread of semantic articles, native select, textarea, buttons, details/summary passages grouped under section stops on a vertical route line.
+FORM: Chat thread of semantic articles, streamed draft replaced by the checked answer, follow-up pills, textarea, buttons, details/summary passages grouped under section stops on a vertical route line.
 
 SIGNATURE: Tapping a signpost chip opens the route map, lights its section stop yellow, opens and focuses the exact passage; reduced motion drops the pulse and the Pokéball thinking wobble.

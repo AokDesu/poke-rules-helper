@@ -1,4 +1,4 @@
-"""Deterministic lexical passage lookup, not semantic entailment or generation."""
+"""Deterministic passage retrieval and local guardrails. Claude judges the evidence."""
 from collections import Counter
 from dataclasses import asdict, dataclass
 from hashlib import sha256
@@ -110,29 +110,6 @@ class Rulebook:
         self.average = sum(self.lengths) / len(self.lengths)
         frequency = Counter(term for doc in self.docs for term in doc)
         self.idf = {t: math.log(1 + (len(self.docs) - n + .5) / (n + .5)) for t, n in frequency.items()}
-        self.topics = {}
-        self.topic_terms = set()
-        for passage in self.passages:
-            local = passage.label.rsplit(" / ", 1)[-1].split(" · ", 1)[-1]
-            named = re.findall(r"\*\*([^*]+?):\*\*", passage.text)
-            subject = re.match(r"(?:The )?([A-Za-z][A-Za-z -]*?)\s+(?:has|have|is|are)\b", passage.text)
-            topic = set(self.tokens(local + " " + " ".join(named)))
-            if subject:
-                topic.update(self.tokens(subject[1]))
-            self.topics[passage.id] = topic
-            # Overviews and decision/evaluation tables remain searchable, but
-            # their prose does not define the gameplay concept vocabulary.
-            if passage.section in self.policy["rule_sections"]:
-                self.topic_terms.update(topic)
-                self.topic_terms.update(self.tokens(passage.label.split(" / ", 1)[0]))
-        # Terms a passage states a count for ("24 spaces", "1–3 AI opponents",
-        # "single-player"): a quantity question may be answered by such a
-        # written count even when its noun is not a rule-section concept.
-        # "N per X" counts something else, not X.
-        self.counted = {p.id: {t for m in re.finditer(
-            r"(?<![\w.])(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|single)\b"
-            r"((?:[ -]+(?!per\b)[a-z]+){1,3})", normalized(p.text)) for t in self.tokens(m[1])}
-            for p in self.passages}
         self.ambiguities = []
         for note in self.policy["ambiguities"]:
             evidence = []
@@ -174,93 +151,57 @@ class Rulebook:
     def source(self, passage):
         return {**asdict(passage), "document": self.provenance["title"]}
 
-    def result(self, status, passages=(), related=(), note=None):
-        return {
-            "status": status, "backend": self.policy["backend"],
-            "message": self.policy["messages"][status], "note": note,
-            "quotes": [{"text": p.text, "citation": p.id} for p in passages],
-            "citations": [self.source(p) for p in passages],
-            "related": [self.source(p) for p in related],
-        }
+    def local(self, status, passages=(), note=None):
+        """A guardrail answer made without any paid request."""
+        return {"status": status, "message": self.policy["messages"][status], "note": note,
+                "citations": [self.source(p) for p in passages]}
 
-    def answer(self, question):
+    def screen(self, question):
+        """Bound the input; answer overrides, hidden-state requests and registered conflicts locally."""
         if not isinstance(question, str) or not question.strip():
             raise ValueError("Enter a rule question.")
         if len(question) > self.policy["max_question_length"]:
             raise ValueError(f"Keep questions to {self.policy['max_question_length']} characters.")
         plain = normalized(question)
-        # Defense in depth only: this backend cannot execute or obey user/document text.
-        if (re.search(r"\b(ignore|override|forget|disregard|bypass)\b.{0,100}\b(instruction|rule|system|previous|scope)", plain)
-                or re.search(r"\b(invent|pretend|roleplay|jailbreak|developer mode|system prompt)\b", plain)):
-            return self.result("boundary")
-        if (re.search(r"\b(show|reveal|list|tell|expose|infer|guess|give)\b", plain)
-                and re.search(r"\b(opponent|enemy|other player|rng|seed|deck order)\b", plain)
-                and re.search(r"\b(hidden|secret|inventory|holding|holds|hand|seed|order)\b", plain)):
-            return self.result("private")
+        if (re.search(r"\b(ignore|override|forget|disregard|bypass)\b.{0,100}\b(instruction|rule|system|previous|scope|prompt)", plain)
+                or re.search(r"\b(invent|pretend|roleplay|role-play|jailbreak|developer mode|system prompt)\b", plain)):
+            return self.local("boundary")
+        asks = re.search(r"\b(show|reveal|list|tell|expose|infer|guess|give|what|which)\b", plain)
+        opponent_secret = (re.search(r"\b(opponents?|enem(?:y|ies)|other players?|rivals?|ais?)\b", plain)
+                           and re.search(r"\b(hidden|hide|hides|hiding|secret|secretly|concealed|private|inventory|holding|holds|hands?)\b", plain))
+        game_secret = re.search(r"\b(rng|seed|deck order|draw order|next (?:event )?card)\b", plain)
+        if asks and (opponent_secret or game_secret):
+            return self.local("private")
         terms = set(self.tokens(question))
         for note, evidence in self.ambiguities:
             if set(note["all_terms"]) <= terms and set(note["any_terms"]) & terms:
-                return self.result("ambiguous", evidence, note=note["note"])
-        # Query framing is not a rule concept. Derive actors from grammatical
-        # position and source names, not a blacklist of particular actor words.
-        framing = {t for t in terms if t.endswith("ly")}
-        for match in re.finditer(
-                r"\b(?:can|could|may|should|do|does|did|will|would)\s+"
-                r"((?:a|an|the|each|every|my|your)\s+)?(\w+)\s+(\w+)", plain):
-            actor = set(self.tokens(match[2]))
-            if (not actor & self.topic_terms
-                    and (match[1] or match[2] in self.stopwords or match[2].endswith("s"))):
-                framing.update(actor)
-        relation = re.match(r"\s*what\s+(\w+)\s+(\w+)", plain)
-        following = set(self.tokens(relation[2])) if relation else set()
-        if relation and (relation[2] in self.stopwords or following & self.idf.keys()):
-            framing.update(self.tokens(relation[1]))
-        for match in re.finditer(r"\b(?:is|are|was|were|been)\s+(\w+ed)\s+(?:in|at|with)\b", plain):
-            framing.update(self.tokens(match[1]))
-        if plain.lstrip().startswith("if "):
-            state = re.search(r"\b(?:is|are)\b[^,;?]*\b(\w+)\s*\??$", plain)
-            if state:
-                framing.update(self.tokens(state[1]))
-        qualifier = re.search(r"\b(?:at|on|in)\s+(\w+)\s*\??$", plain)
-        if qualifier and not set(self.tokens(qualifier[1])) & self.topic_terms:
-            framing.update(self.tokens(qualifier[1]))
-        meaningful = terms - framing
-        hits = self.search(" ".join(sorted(meaningful)), 30)
-        # A novel mechanic/asset is not supported by matching familiar resources.
-        if not meaningful or meaningful - self.idf.keys():
-            return self.result("unsupported", related=hits[:3])
-        focus = meaningful & self.topic_terms
-        quantity = re.search(
-            r"\bhow\s+(?:many|much)\s+(.+?)(?=\b(?:do|does|did|can|could|may|is|are|was|were|has|have)\b|[?]|$)",
-            plain)
-        facets = set(self.tokens(quantity[1])) - framing if quantity else set()
-        direct = bool(re.match(r"\s*(?:can|could|may|should|do|does|did)\b", plain))
-        evidence = []
-        for passage in hits:
-            body = set(self.tokens(passage.text))
-            context = body | set(self.tokens(passage.label))
-            local = self.topics[passage.id]
-            # A table names a particular entity; a generic Ball match cannot
-            # select every Ball type or a class that merely receives that item.
-            if passage.text.startswith("|") and not local <= meaningful:
+                return self.local("ambiguous", evidence, note["note"])
+        return None
+
+    def context(self, query, max_bytes, limit=20):
+        """Best-ranked passages within the byte budget.
+
+        A sparse match (a broad question such as "how do I play?") is filled with
+        each indexed section's opening passage, in document order, so the model
+        sees an outline of the whole game. A passage on one side of a registered
+        conflict brings every side and the editorial note, so the model sees the
+        whole conflict instead of half of it.
+        """
+        chosen, notes, used = [], [], 0
+        ranked = self.search(query, limit) if query.strip() else []
+        openers = list({p.section: p for p in reversed(self.passages)}.values())[::-1]
+        for passage in ranked + (openers if len(ranked) < limit // 2 else []):
+            if passage in chosen or len(chosen) >= limit:
                 continue
-            anchored = bool(local & meaningful)
-            # The requested quantity itself is the subject when the fact
-            # states a count for it; an incidental number elsewhere is not.
-            counted = bool(facets and facets <= self.counted[passage.id])
-            if not anchored:
-                parent = set(self.tokens(passage.label.split(" / ", 1)[0]))
-                anchored = counted or bool(facets and parent & focus and facets <= body)
-            if (not anchored or not (focus or counted) or not focus <= context
-                    or not facets <= body or direct and not meaningful <= context):
+            group, note = [passage], None
+            for candidate, evidence in self.ambiguities:
+                if passage in evidence:
+                    group, note = [p for p in evidence if p not in chosen], candidate
+            size = sum(len((p.label + p.text).encode("utf-8")) for p in group)
+            if used + size > max_bytes:
                 continue
-            evidence.append(passage)
-        if not evidence:
-            return self.result("unsupported", related=hits[:3])
-        source_ids = {p.id for p in evidence}
-        for note, sources in self.ambiguities:
-            if source_ids & {p.id for p in sources}:
-                return self.result("ambiguous", sources, note=note["note"])
-        # A bounded evidence set, not a winning overview section. Keep the
-        # retriever's order; no second score or paid selection step.
-        return self.result("extracts", evidence[:3])
+            chosen.extend(group)
+            used += size
+            if note is not None and note not in notes:
+                notes.append(note)
+        return chosen, [note["note"] for note in notes]

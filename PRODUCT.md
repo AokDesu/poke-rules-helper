@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Python standard-library server with static HTML/CSS/JavaScript; no application packages or build step. Explicit Offline mode needs no external service. Explicit Live mode calls Claude's Messages API server-side using claude-haiku-5-5.
+Python standard-library server with static HTML/CSS/JavaScript; no application packages or build step. Every answer comes from Claude's Messages API, called server-side with claude-haiku-5-5; there is no offline answer mode.
 
 ## Users
 
@@ -24,7 +24,7 @@ Loopback-only local browser app. The game specification is a read-only input, no
 
 ## Capabilities and Constraints
 
-Credential-free extractive lookup and deliberately selected Claude explanations share the deterministic retriever. Quotes and generated explanations have distinct labels, precise source navigation, and honest unresolved states. Rulebook and local screening instructions remain replaceable; the live safety instruction is server-side code. No deployment, login, vector service, runtime coding-account invocation, invented game rules, or live-game integration. English lexical retrieval; multilingual behavior is not promised.
+The deterministic retriever chooses the passages; Claude judges them and answers with citations, streamed, with follow-up context from the last few exchanges. Local guardrails answer overrides, opponent-secret requests and the registered conflict without a paid call. Generated text has precise source navigation and honest uncovered, unverified and withdrawn states. Rulebook and local screening instructions remain replaceable; the Claude safety instruction is server-side code. No deployment, login, vector service, runtime coding-account invocation, invented game rules, or live-game integration. English lexical retrieval; multilingual behavior is not promised.
 
 ## Evidence on Hand
 
