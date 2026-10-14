@@ -66,7 +66,14 @@ def parse_passages(text, sections):
                         f"s{section.replace(' ', '-')}-l{n}", section,
                         f"§{section} · {heading}" + (f" / {subsection}" if subsection else ""),
                         table_header + "\n" + line, table_start, n))
-        elif not line.strip() or line.startswith("```"):
+        elif not line.strip():
+            # A colon introduces the following list, even across a blank line.
+            # Keep the exact contiguous span so headings cannot replace their rules.
+            if pending and pending[-1].rstrip().endswith(":"):
+                pending.append(line)
+            else:
+                flush()
+        elif line.startswith("```"):
             flush()
         else:
             if not pending:
@@ -166,17 +173,30 @@ class Rulebook:
         hits = self.search(question, 12)
         if not hits or not terms:
             return self.result("unsupported")
-        # Unknown concepts and disconnected sections must not become purported support.
-        # Accept only complete lexical coverage in ONE source section. Still quotes, never yes/no.
-        for section in dict.fromkeys(p.section for p in hits):
-            candidates, covered = [], set()
-            for passage in (p for p in hits if p.section == section):
-                contribution = terms & set(self.tokens(passage.text))
-                if contribution - covered:
-                    candidates.append(passage)
-                    covered |= contribution
-                if terms <= covered:
-                    return self.result("extracts", candidates)
-                if len(candidates) == 3:
-                    break
+        informational = bool(re.match(r"\s*(what|how|when|where|who|why)\b", plain))
+        candidates = []
+        for rank, passage in enumerate(hits):
+            body = set(self.tokens(passage.text))
+            covered = terms & body
+            if not covered or passage.text.rstrip().endswith(":"):
+                continue
+            # Admission belongs to a substantive passage, never a union of
+            # disconnected paragraphs or unrelated rows in the same appendix.
+            if covered != terms:
+                minimum = 2 if informational else 3
+                if len(covered) < minimum or len(covered) * 3 < len(terms) * 2:
+                    continue
+            # Prefer stronger topic coverage over BM25's short-summary bias.
+            # Short incidental words cannot outweigh longer shared topic terms.
+            score = (len(covered), sum(len(t) for t in covered),
+                     len(terms & set(self.tokens(passage.label))) if len(terms) == 1 else 0,
+                     -rank)
+            candidates.append((score, passage))
+        if candidates:
+            _, best = max(candidates, key=lambda item: item[0])
+            # Retain the section's substantive context in source order, including
+            # both the turn stages and their budgets. Live limits still apply.
+            selected = sorted((p for _, p in candidates if p.section == best.section),
+                              key=lambda p: p.line_start)
+            return self.result("extracts", selected)
         return self.result("unsupported", related=hits[:3])

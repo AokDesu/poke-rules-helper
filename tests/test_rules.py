@@ -151,5 +151,49 @@ class RulebookTests(unittest.TestCase):
                 self.book.answer(question)
 
 
+class OrdinaryQuestionTests(unittest.TestCase):
+    """Source-backed expectations from the shipped specification, not the matcher."""
+    def test_ordinary_questions_cite_substantive_rules(self):
+        book = Rulebook()
+        cases = (
+            ("What determines the winner at the end?", "4.7", ("most coins", "Ties go to badges", "co-winners")),
+            ("How do I win the game?", "1", ("most coins",)),
+            ("How many coins do I start off with?", "4.1", ("20 coins", "Nothing is paid at setup")),
+            ("How many Poké Balls do I start out with?", "4.1", ("5 Poké Balls",)),
+            ("What can I do on my turn?", "4.2", ("**Strategy:**", "**Move:**", "**Resolve:**", "tacticalAction = 1", "catchAttempt = 1", "pokemonAbility = 1")),
+            ("What are the turn action budgets?", "4.2", ("tacticalAction = 1", "catchAttempt = 1", "pokemonAbility = 1")),
+            ("What happens when I move past Start?", "4.1", ("pays 5 coins", "once per pass")),
+            ("If I fail to catch a Pokémon, is my Ball gone?", "4.3", ("consumes 1 Ball, success or failure",)),
+            ("How many utility items can I hold simultaneously?", "4.6", ("up to 4 utility items",)),
+            ("At setup, how much cash is in my initial kit?", "4.1", ("20 coins",)),
+            ("How many Balls are provided in my starting kit?", "4.1", ("5 Poké Balls",)),
+            ("What determines winning when the game ends?", "4.7", ("Ties go to badges",)),
+            ("How many items may I carry in my inventory?", "4.6", ("up to 4 utility items",)),
+            ("Does a failed catch still use a Ball?", "4.3", ("consumes 1 Ball, success or failure",)),
+        )
+        for question, section, facts in cases:
+            with self.subTest(question=question):
+                result = book.answer(question)
+                self.assertEqual(result["status"], "extracts")
+                evidence = "\n".join(s["text"] for s in result["citations"] if s["section"] == section)
+                for fact in facts:
+                    self.assertIn(fact, evidence)
+                for source in result["citations"]:
+                    self.assertIn(source, [book.source(p) for p in book.passages])
+
+    def test_absent_rules_cannot_borrow_other_passages_or_table_rows(self):
+        book = Rulebook()
+        for question in ("Can I mortgage Pokémon at Start for extra coins?",
+                         "Can I mortgage Balls for coins?",
+                         "Do catch attempts award bonus mortgage coins?",
+                         "Can I trade Balls for bitcoins?",
+                         "Can the starting kit block PvP?"):
+            with self.subTest(question=question):
+                result = book.answer(question)
+                self.assertEqual(result["status"], "unsupported")
+                self.assertEqual(result["citations"], [])
+                self.assertEqual(result["quotes"], [])
+
+
 if __name__ == "__main__":
     unittest.main()
