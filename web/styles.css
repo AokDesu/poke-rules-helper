@@ -91,8 +91,10 @@ p { margin-bottom: 1rem; }
 .answer .answer-heading { color: var(--accent); font-size: .875rem; margin: 0 0 .6rem; }
 .answer > p { font-size: .875rem; max-width: 70ch; }
 .answer .answer-meta { color: var(--muted); font-size: .8rem; margin-bottom: .6rem; overflow-wrap: anywhere; }
-.generated-segment { margin: 1rem 0; }
+.generated-answer { margin: 1rem 0; }
 .generated-text { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 70ch; }
+.uncited-text { color: var(--warning-ink); background: var(--warning-ground); }
+.citation-index { color: var(--citation); margin-left: .15em; font-size: .75em; font-variant-numeric: tabular-nums; }
 .generated-citations { display: grid; gap: .5rem; }
 .unverified { color: var(--warning-ink); background: var(--warning-ground); padding: .5rem .7rem; font-size: .875rem; }
 .answer.ambiguous > .answer-heading, .answer.unsupported > .answer-heading { color: var(--warning-ink); }

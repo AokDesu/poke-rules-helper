@@ -64,7 +64,7 @@ function updateMode() {
     ? "Offline quotations only. No credentials needed and no paid requests."
     : missing
       ? "Key missing. Set ANTHROPIC_API_KEY privately in the server environment or local .env, then restart. Nothing is sent until a key is configured."
-      : `Credential configured, not verified. Eligible questions send retrieved passages to Claude, up to ${backendInfo.live.max_output_tokens} output tokens. Paid requests; no automatic retries or offline fallback.`;
+      : `${backendInfo.live.successful_request_seen ? "A live request succeeded in this session." : "Credential configured, not yet verified in this session."} Eligible questions send retrieved passages to Claude, up to ${backendInfo.live.max_output_tokens} output tokens. Paid requests; no automatic retries or offline fallback.`;
   $("#welcome-copy").textContent = live
     ? "Claude explains retrieved written rules with source references. Check the interpretation. Known conflicts and unsupported questions stay unresolved; no game state is connected."
     : "This offline helper finds and quotes written rules. It does not generate rulings, track your game, or fill gaps with guesses.";
@@ -173,18 +173,41 @@ function renderAnswer(result) {
     block.append(passageBody(quote.text), sourceButton(source));
     article.append(block);
   }
-  for (const segment of result.segments || []) {
-    const block = element("div", undefined, "generated-segment");
-    // Provider-generated text is never parsed as HTML, Markdown links or controls.
-    block.append(element("p", segment.text, "generated-text"));
-    const list = element("div", undefined, "generated-citations");
-    for (const id of segment.citations) {
-      // Only the source library supplies navigation targets and labels.
-      const source = citations.has(id) && sourceCatalog.get(id);
-      if (source) list.append(sourceButton(source));
+  if (result.segments?.length) {
+    const block = element("div", undefined, "generated-answer");
+    const prose = element("p", undefined, "generated-text");
+    const references = new Map();
+    let uncited = false;
+    for (const segment of result.segments) {
+      const numbers = [];
+      for (const id of segment.citations) {
+        // Only the source library supplies navigation targets and labels.
+        const source = citations.has(id) && sourceCatalog.get(id);
+        if (!source) continue;
+        if (!references.has(id)) references.set(id, { source, number: references.size + 1 });
+        numbers.push(references.get(id).number);
+      }
+      // Native citation chunks can split a sentence. Keep their text contiguous,
+      // but never extend a citation's support to an adjacent uncited chunk.
+      const text = element(numbers.length ? "span" : "mark", segment.text, numbers.length ? undefined : "uncited-text");
+      if (!numbers.length) {
+        uncited = true;
+        text.title = "No supporting citation · unverified text";
+      }
+      prose.append(text);
+      if (numbers.length) prose.append(element("sup", `[${numbers.join(", ")}]`, "citation-index"));
     }
-    if (!list.childElementCount) block.append(element("p", "No supporting citation · this text is unverified.", "unverified"));
-    else block.append(list);
+    block.append(prose);
+    if (uncited) block.append(element("p", "Highlighted text has no supporting citation and is unverified.", "unverified"));
+    const list = element("div", undefined, "generated-citations");
+    for (const { source, number } of references.values()) {
+      const button = sourceButton(source);
+      button.prepend(document.createTextNode(`[${number}] `));
+      list.append(button);
+    }
+    if (list.childElementCount) {
+      block.append(element("p", "Sources for numbered text · review the interpretation", "related-heading"), list);
+    }
     article.append(block);
   }
   if (result.related.length) {
@@ -227,6 +250,7 @@ async function ask(question, existingTurn) {
   try {
     const result = await request("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question, mode }) });
     turn.append(renderAnswer(result));
+    if (result.response_method === "claude") backendInfo.live.successful_request_seen = true;
     $("#question").value = "";
     updateMode();
     $("#chat-status").textContent = result.response_method === "claude" ? `${headings[result.status]}. ${result.citations.length} supporting source references.` : `${headings[result.status]}. No Claude request made.`;

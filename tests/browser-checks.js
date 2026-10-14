@@ -45,7 +45,9 @@ async () => {
     assert(!window.__unsafeRuleText, "Generated code must never run");
     assert(answer.textContent.includes("<img"), "Untrusted text must remain readable, not interpreted");
     assert(answer.querySelectorAll(".citation").length === 1, "Invented references must not become source navigation");
-    assert(answer.querySelectorAll(".unverified").length === 2, "Uncited and invented-reference claims must be visibly unverified");
+    const unverified = [...answer.querySelectorAll(".uncited-text")].map(node => node.textContent);
+    assert(unverified.includes("Uncited rule claim"), "Uncited claims must be visibly marked, not inherit nearby support");
+    assert(unverified.includes("Invented reference claim"), "Unknown-reference claims must stay visibly unverified");
     answer.querySelector(".citation").click();
     await until(() => document.getElementById(source.id)?.open);
     assert(document.activeElement === document.getElementById(source.id).querySelector("summary"), "Citation must focus its source");
