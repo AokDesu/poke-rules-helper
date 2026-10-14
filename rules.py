@@ -125,6 +125,14 @@ class Rulebook:
             if passage.section in self.policy["rule_sections"]:
                 self.topic_terms.update(topic)
                 self.topic_terms.update(self.tokens(passage.label.split(" / ", 1)[0]))
+        # Terms a passage states a count for ("24 spaces", "1–3 AI opponents",
+        # "single-player"): a quantity question may be answered by such a
+        # written count even when its noun is not a rule-section concept.
+        # "N per X" counts something else, not X.
+        self.counted = {p.id: {t for m in re.finditer(
+            r"(?<![\w.])(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|single)\b"
+            r"((?:[ -]+(?!per\b)[a-z]+){1,3})", normalized(p.text)) for t in self.tokens(m[1])}
+            for p in self.passages}
         self.ambiguities = []
         for note in self.policy["ambiguities"]:
             evidence = []
@@ -237,10 +245,13 @@ class Rulebook:
             if passage.text.startswith("|") and not local <= meaningful:
                 continue
             anchored = bool(local & meaningful)
+            # The requested quantity itself is the subject when the fact
+            # states a count for it; an incidental number elsewhere is not.
+            counted = bool(facets and facets <= self.counted[passage.id])
             if not anchored:
                 parent = set(self.tokens(passage.label.split(" / ", 1)[0]))
-                anchored = bool(facets and parent & focus and facets <= body)
-            if (not anchored or not focus or not focus <= context
+                anchored = counted or bool(facets and parent & focus and facets <= body)
+            if (not anchored or not (focus or counted) or not focus <= context
                     or not facets <= body or direct and not meaningful <= context):
                 continue
             evidence.append(passage)

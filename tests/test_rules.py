@@ -224,6 +224,42 @@ class OrdinaryQuestionTests(unittest.TestCase):
                 self.assertEqual(result["citations"], [])
                 self.assertEqual(result["quotes"], [])
 
+    def test_requested_participant_counts_differ_from_incidental_actors(self):
+        book = Rulebook()
+        participants = "one human plays against 1–3 AI opponents"
+        cases = (
+            ("How many players can play this game?", "1", participants),
+            ("How many human players are there?", "1", participants),
+            ("How many AI opponents can I play against?", "1", participants),
+            ("How many AIs can I play against?", "1", "1–3 AIs, 2–4 seats in total"),
+            ("How many spaces does the board have?", "4.1", "Board:** 24 spaces"),
+            ("How many utility items may a player hold at once?", "4.6", "up to 4 utility items"),
+            ("How many utility items can an AI hold?", "4.6", "up to 4 utility items"),
+            ("How many coins does each human start with?", "4.1", "20 coins"),
+        )
+        for question, section, fact in cases:
+            with self.subTest(question=question):
+                result = book.answer(question)
+                self.assertEqual(result["status"], "extracts")
+                self.assertIn(fact, "\n".join(s["text"] for s in result["citations"] if s["section"] == section))
+        # An actor in an item/resource question is not a participant-count request.
+        for question in ("How many utility items may a player hold at once?",
+                         "How many coins does each human start with?"):
+            with self.subTest(question=question):
+                texts = "\n".join(s["text"] for s in book.answer(question)["citations"])
+                self.assertNotIn(participants, texts)
+
+    def test_participant_counts_do_not_support_unwritten_or_mixed_premises(self):
+        book = Rulebook()
+        for question in ("How many players can mortgage Balls?",
+                         "How many players can block PvP?",
+                         "How many players does the starting kit have?"):
+            with self.subTest(question=question):
+                result = book.answer(question)
+                self.assertEqual(result["status"], "unsupported")
+                self.assertEqual(result["citations"], [])
+                self.assertEqual(result["quotes"], [])
+
     def test_fact_and_parent_list_citations_open_the_exact_written_span(self):
         book = Rulebook()
         lines = book.raw.splitlines()
