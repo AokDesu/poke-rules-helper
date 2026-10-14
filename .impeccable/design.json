@@ -1,25 +1,556 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-14T05:06:49Z",
+  "generatedAt": "2026-10-14T13:40:30+00:00",
   "title": "Design System: Poke Monopoly Rules Helper",
   "extensions": {
-    "motion": [{"name": "source-focus", "value": "180ms ease-out", "purpose": "One evidence-selection color transition; omitted under reduced motion."}],
-    "breakpoints": [{"name": "stacked", "value": "850px"}, {"name": "compact-composer", "value": "420px"}],
-    "shadows": []
+    "colorMeta": {
+      "sea": {
+        "role": "primary",
+        "displayName": "Map Sea",
+        "canonical": "#1b5680",
+        "tonalRamp": [
+          "#0d2a3f",
+          "#164769",
+          "#1f6393",
+          "#2b88ca",
+          "#57a4db",
+          "#89bfe6",
+          "#bcdbf1",
+          "#eaf4fb"
+        ]
+      },
+      "sea-deep": {
+        "role": "neutral",
+        "displayName": "Deep Sea",
+        "canonical": "#123d5c",
+        "tonalRamp": [
+          "#0d2a40",
+          "#15476b",
+          "#1d6395",
+          "#2888cd",
+          "#54a4de",
+          "#88bfe8",
+          "#bbdbf2",
+          "#eaf4fb"
+        ]
+      },
+      "sea-tint": {
+        "role": "neutral",
+        "displayName": "Sea Tint",
+        "canonical": "#e3eef6",
+        "tonalRamp": [
+          "#13293a",
+          "#1f4560",
+          "#2b6087",
+          "#3c84b9",
+          "#65a1cd",
+          "#93bddc",
+          "#c1daeb",
+          "#ecf3f9"
+        ]
+      },
+      "sea-text": {
+        "role": "neutral",
+        "displayName": "Sea Foam Text",
+        "canonical": "#eef5fa",
+        "tonalRamp": [
+          "#112a3b",
+          "#1d4663",
+          "#29618a",
+          "#3886bd",
+          "#61a2d1",
+          "#91bedf",
+          "#c0daec",
+          "#ebf3f9"
+        ]
+      },
+      "sea-muted": {
+        "role": "neutral",
+        "displayName": "Sea Mist",
+        "canonical": "#bcd4e6",
+        "tonalRamp": [
+          "#152938",
+          "#23445d",
+          "#315f82",
+          "#4382b2",
+          "#6aa0c8",
+          "#97bcd8",
+          "#c4d9e9",
+          "#ecf3f8"
+        ]
+      },
+      "land": {
+        "role": "neutral",
+        "displayName": "Land",
+        "canonical": "#edf4e6",
+        "tonalRamp": [
+          "#263517",
+          "#405927",
+          "#597c37",
+          "#7aaa4b",
+          "#99c171",
+          "#b8d39c",
+          "#d6e6c6",
+          "#f2f7ed"
+        ]
+      },
+      "land-deep": {
+        "role": "neutral",
+        "displayName": "Deep Land",
+        "canonical": "#dbe8cf",
+        "tonalRamp": [
+          "#263419",
+          "#3f5629",
+          "#58793a",
+          "#79a54f",
+          "#98bd75",
+          "#b7d19e",
+          "#d6e5c8",
+          "#f2f7ee"
+        ]
+      },
+      "land-line": {
+        "role": "neutral",
+        "displayName": "Land Line",
+        "canonical": "#c3d4b4",
+        "tonalRamp": [
+          "#26311c",
+          "#3f512e",
+          "#587141",
+          "#789c59",
+          "#97b57d",
+          "#b6cba4",
+          "#d6e1cb",
+          "#f2f6ef"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#7a7a7a",
+          "#999999",
+          "#b8b8b8",
+          "#d6d6d6",
+          "#f2f2f2"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1b2a33",
+        "tonalRamp": [
+          "#1a2932",
+          "#2c4553",
+          "#3e6075",
+          "#5584a0",
+          "#7aa1b8",
+          "#a2bdce",
+          "#cad9e3",
+          "#eef3f6"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "canonical": "#4d5f6b",
+        "tonalRamp": [
+          "#20272c",
+          "#35424a",
+          "#4b5c68",
+          "#667e8e",
+          "#889caa",
+          "#acbac3",
+          "#d0d8dd",
+          "#f0f3f4"
+        ]
+      },
+      "sign": {
+        "role": "secondary",
+        "displayName": "Signpost Sand",
+        "canonical": "#f4e6bb",
+        "tonalRamp": [
+          "#42340b",
+          "#6e5712",
+          "#9a7a19",
+          "#d3a722",
+          "#e3be4f",
+          "#ebd284",
+          "#f4e5b9",
+          "#fbf7e9"
+        ]
+      },
+      "sign-edge": {
+        "role": "neutral",
+        "displayName": "Signpost Edge",
+        "canonical": "#b8933f",
+        "tonalRamp": [
+          "#392e14",
+          "#5f4c21",
+          "#856a2e",
+          "#b6923e",
+          "#cbac67",
+          "#dbc595",
+          "#eadec2",
+          "#f8f5ec"
+        ]
+      },
+      "sign-ink": {
+        "role": "neutral",
+        "displayName": "Signpost Lettering",
+        "canonical": "#4c3810",
+        "tonalRamp": [
+          "#3f2f0d",
+          "#694e16",
+          "#936d1f",
+          "#ca952b",
+          "#dcaf56",
+          "#e6c789",
+          "#f1dfbc",
+          "#fbf5ea"
+        ]
+      },
+      "marker": {
+        "role": "primary",
+        "displayName": "Town Marker Red",
+        "canonical": "#cc3324",
+        "tonalRamp": [
+          "#41100b",
+          "#6c1b13",
+          "#98261b",
+          "#d03425",
+          "#e05e52",
+          "#ea8f86",
+          "#f3bfba",
+          "#fbebe9"
+        ]
+      },
+      "marker-deep": {
+        "role": "neutral",
+        "displayName": "Deep Marker Red",
+        "canonical": "#a3261a",
+        "tonalRamp": [
+          "#420f0b",
+          "#6e1a12",
+          "#9a2419",
+          "#d33122",
+          "#e35c4f",
+          "#eb8d84",
+          "#f4beb9",
+          "#fbebe9"
+        ]
+      },
+      "spark": {
+        "role": "secondary",
+        "displayName": "Pikachu Spark",
+        "canonical": "#f6c945",
+        "tonalRamp": [
+          "#493704",
+          "#7a5c06",
+          "#aa8108",
+          "#eab10b",
+          "#f6c73c",
+          "#f8d777",
+          "#fbe8b1",
+          "#fef8e7"
+        ]
+      },
+      "warning-ink": {
+        "role": "neutral",
+        "displayName": "Amber Ink",
+        "canonical": "#6a4806",
+        "tonalRamp": [
+          "#483104",
+          "#795207",
+          "#a9730a",
+          "#e89d0d",
+          "#f4b63e",
+          "#f7cc78",
+          "#fbe2b2",
+          "#fef6e7"
+        ]
+      },
+      "warning-ground": {
+        "role": "tertiary",
+        "displayName": "Amber Ground",
+        "canonical": "#fcefc7",
+        "tonalRamp": [
+          "#493804",
+          "#795d06",
+          "#a98209",
+          "#e8b20c",
+          "#f5c83d",
+          "#f8d877",
+          "#fbe9b2",
+          "#fef8e7"
+        ]
+      },
+      "conflict-ink": {
+        "role": "neutral",
+        "displayName": "Ditto Violet Ink",
+        "canonical": "#57347f",
+        "tonalRamp": [
+          "#251636",
+          "#3e255a",
+          "#57347f",
+          "#7747ae",
+          "#966ec4",
+          "#b69ad6",
+          "#d5c5e7",
+          "#f2edf8"
+        ]
+      },
+      "conflict-ground": {
+        "role": "tertiary",
+        "displayName": "Ditto Violet Ground",
+        "canonical": "#efe6fa",
+        "tonalRamp": [
+          "#240d40",
+          "#3b156a",
+          "#531e95",
+          "#7229cc",
+          "#9255dd",
+          "#b388e7",
+          "#d3bbf1",
+          "#f1eafb"
+        ]
+      },
+      "block-ink": {
+        "role": "neutral",
+        "displayName": "Snorlax Slate Ink",
+        "canonical": "#2b5059",
+        "tonalRamp": [
+          "#192e34",
+          "#2a4d56",
+          "#3a6c78",
+          "#5094a5",
+          "#75afbd",
+          "#9fc7d0",
+          "#c8dfe4",
+          "#eef5f7"
+        ]
+      },
+      "block-ground": {
+        "role": "tertiary",
+        "displayName": "Snorlax Slate Ground",
+        "canonical": "#e0edef",
+        "tonalRamp": [
+          "#1a2f32",
+          "#2b4f54",
+          "#3d6e76",
+          "#5397a1",
+          "#78b1ba",
+          "#a1c8ce",
+          "#c9e0e3",
+          "#eef5f6"
+        ]
+      },
+      "error-ink": {
+        "role": "neutral",
+        "displayName": "Error Ink",
+        "canonical": "#8a262c",
+        "tonalRamp": [
+          "#3c1113",
+          "#641c20",
+          "#8c272d",
+          "#c0353d",
+          "#d35f66",
+          "#e08f94",
+          "#edbfc2",
+          "#f9ebec"
+        ]
+      },
+      "error-ground": {
+        "role": "tertiary",
+        "displayName": "Error Ground",
+        "canonical": "#ffebea",
+        "tonalRamp": [
+          "#4c0400",
+          "#800600",
+          "#b20800",
+          "#f50c00",
+          "#ff3d33",
+          "#ff7770",
+          "#ffb1ad",
+          "#ffe7e5"
+        ]
+      },
+      "ok": {
+        "role": "neutral",
+        "displayName": "Ready Green",
+        "canonical": "#7fd3a6",
+        "tonalRamp": [
+          "#143925",
+          "#215f3e",
+          "#2e8556",
+          "#3fb676",
+          "#67cb95",
+          "#95dab5",
+          "#c2ead5",
+          "#ecf8f2"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "App name in the top bar."
+      },
+      "greeting": {
+        "displayName": "Greeting",
+        "purpose": "Guide welcome heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Questions and generated explanations."
+      },
+      "passage": {
+        "displayName": "Passage",
+        "purpose": "Quoted rule text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Stamps, chips, stop names, mode label."
+      },
+      "fine": {
+        "displayName": "Fine",
+        "purpose": "Help, meta and credits; never below 12px."
+      }
+    },
+    "shadows": [
+      {
+        "name": "portrait-lift",
+        "value": "0 1px 3px rgba(18, 61, 92, .18)",
+        "purpose": "Separates round guide portraits from the land ground."
+      }
+    ],
+    "motion": [
+      {
+        "name": "arrive",
+        "value": "260ms cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "New message settles from 0.4 opacity and 6px."
+      },
+      {
+        "name": "catch-wobble",
+        "value": "1.6s cubic-bezier(.36, 0, .2, 1) infinite",
+        "purpose": "Pokéball and portrait wobble while an answer is prepared."
+      },
+      {
+        "name": "you-are-here",
+        "value": "900ms cubic-bezier(.16, 1, .3, 1) x2",
+        "purpose": "Current route stop pulses when a citation opens it."
+      },
+      {
+        "name": "caret",
+        "value": "1s steps(2, jump-none) infinite",
+        "purpose": "Streaming caret blink while Claude writes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "map-sheet",
+        "value": "1023px"
+      },
+      {
+        "name": "compact",
+        "value": "560px"
+      }
+    ]
   },
   "components": [
-    {"name": "Primary action", "kind": "button", "refersTo": "button-primary", "description": "Submit a rule question.", "html": "<button class=\"ds-primary\">Ask question</button>", "css": ".ds-primary{font:600 1rem system-ui;color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:var(--radius);padding:.55rem .85rem;min-height:44px;cursor:pointer}.ds-primary:hover:not(:disabled){background:var(--accent-hover)}.ds-primary:active:not(:disabled){background:var(--shell)}.ds-primary:focus-visible{outline:3px solid var(--citation);outline-offset:3px}.ds-primary:disabled{color:var(--muted);background:#e7edeb;cursor:not-allowed}"},
-    {"name": "Secondary action", "kind": "button", "description": "Search or retry without primary emphasis.", "html": "<button class=\"ds-secondary\">Search</button>", "css": ".ds-secondary{font:600 1rem system-ui;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:.55rem .85rem;min-height:44px;cursor:pointer}.ds-secondary:hover{background:var(--reference)}.ds-secondary:active{background:#c9dfd7}.ds-secondary:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"},
-    {"name": "Rule question", "kind": "input", "description": "Explicitly labeled multiline input.", "html": "<label class=\"ds-label\" for=\"ds-question\">Your rule question</label><textarea class=\"ds-question\" id=\"ds-question\" rows=\"3\"></textarea>", "css": ".ds-label{display:block;font:650 .875rem system-ui;color:var(--ink);margin-bottom:.45rem}.ds-question{box-sizing:border-box;width:100%;font:1rem system-ui;color:var(--ink);background:var(--paper);border:1px solid #75928d;border-radius:var(--radius);padding:.7rem .8rem;caret-color:var(--accent)}.ds-question:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"},
-    {"name": "Source disclosure", "kind": "custom", "description": "Native source navigation with line provenance.", "html": "<details class=\"ds-source\"><summary>§4.3 · Catching</summary><p>Expand the labeled source passage.</p></details>", "css": ".ds-source{font:.875rem/1.55 system-ui;color:var(--ink);border-bottom:1px solid var(--line);padding:.85rem 0}.ds-source summary{cursor:pointer;font-weight:600}.ds-source summary:hover{color:var(--accent)}.ds-source summary:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"},
-    {"name": "Source citation", "kind": "button", "description": "Opens and focuses supporting evidence.", "html": "<button class=\"ds-citation\">§4.3 · Catching · L179–181</button>", "css": ".ds-citation{font:550 .8rem system-ui;color:var(--citation);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:.4rem .65rem;min-height:44px;text-align:left;cursor:pointer}.ds-citation:hover{background:var(--reference)}.ds-citation:active{background:#c9dfd7}.ds-citation:focus-visible{outline:3px solid var(--citation);outline-offset:3px}"}
+    {
+      "name": "Ask Button",
+      "kind": "button",
+      "refersTo": "button-send",
+      "description": "The single primary action, docked beside the question field.",
+      "html": "<button class=\"ds-send\">Ask</button>",
+      "css": ".ds-send{min-height:52px;min-width:6.5rem;border-radius:14px;background:#cc3324;border:1px solid #cc3324;color:#fff;font:700 1rem system-ui,sans-serif;padding:.5rem 1rem;cursor:pointer}.ds-send:hover{background:#a3261a}.ds-send:active{background:#85200f}.ds-send:focus-visible{outline:3px solid #1b5680;outline-offset:2px}"
+    },
+    {
+      "name": "Question Field",
+      "kind": "input",
+      "refersTo": "bubble-guide",
+      "description": "Auto-growing composer textarea.",
+      "html": "<textarea class=\"ds-question\" rows=\"1\" placeholder=\"Ask a rule question\"></textarea>",
+      "css": ".ds-question{width:100%;min-height:52px;resize:none;border:1px solid #8aa596;border-radius:14px;padding:.8rem 1rem;font:1rem/1.45 system-ui,sans-serif;color:#1b2a33;caret-color:#cc3324}.ds-question::placeholder{color:#5a6c76}.ds-question:focus-visible{outline:3px solid #1b5680;outline-offset:2px}"
+    },
+    {
+      "name": "Signpost Citation",
+      "kind": "chip",
+      "refersTo": "chip-signpost",
+      "description": "Supporting citation; opens the map at the exact passage.",
+      "html": "<button class=\"ds-sign\"><span>§4.1 · Setup and board / Starting kit</span><span class=\"ds-lines\">L143</span></button>",
+      "css": ".ds-sign{display:inline-flex;align-items:center;gap:.5rem;min-height:40px;font:600 .8125rem/1.3 system-ui,sans-serif;color:#4c3810;background:#f4e6bb;border:1px solid #b8933f;border-radius:999px;padding:.35rem .85rem .35rem .6rem;cursor:pointer}.ds-sign::before{content:\"\";width:10px;height:10px;border-radius:50%;background:#4c3810;box-shadow:0 0 0 2px #f4e6bb,0 0 0 3px #b8933f}.ds-sign:hover{background:#efd998}.ds-sign:focus-visible{outline:3px solid #1b5680;outline-offset:2px}.ds-lines{font-weight:700;font-variant-numeric:tabular-nums;padding-left:.5rem;border-left:1px solid #b8933f}"
+    },
+    {
+      "name": "Guide Bubble",
+      "kind": "card",
+      "refersTo": "bubble-guide",
+      "description": "Assistant message with state stamp.",
+      "html": "<div class=\"ds-guide\"><span class=\"ds-stamp\">Claude is answering…</span><p>You start with 20 coins.</p></div>",
+      "css": ".ds-guide{background:#fff;border:1px solid #c3d4b4;border-radius:4px 14px 14px 14px;padding:.9rem 1.1rem;font:1rem/1.55 system-ui,sans-serif;color:#1b2a33}.ds-stamp{display:inline-block;font-weight:700;font-size:.8125rem;padding:.25rem .65rem;border-radius:999px;color:#123d5c;background:#e3eef6;margin-bottom:.6rem}"
+    },
+    {
+      "name": "Trainer Bubble",
+      "kind": "card",
+      "refersTo": "bubble-trainer",
+      "description": "User question.",
+      "html": "<div class=\"ds-trainer\">How many players can play this game?</div>",
+      "css": ".ds-trainer{display:inline-block;background:#1b5680;color:#eef5fa;border-radius:14px 4px 14px 14px;padding:.7rem 1rem;font:1rem/1.55 system-ui,sans-serif}"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "topbar",
+      "description": "Brand, backend status and the Rulebook map toggle.",
+      "html": "<header class=\"ds-top\"><strong>Poke Monopoly <span>Rules Helper</span></strong><button class=\"ds-toggle\">Rulebook map</button></header>",
+      "css": ".ds-top{display:flex;justify-content:space-between;align-items:center;background:#1b5680;color:#eef5fa;padding:.7rem 1.5rem;font:1.125rem system-ui,sans-serif}.ds-top span{font-weight:450;color:#bcd4e6}.ds-toggle{min-height:44px;color:#eef5fa;background:transparent;border:1px solid rgba(238,245,250,.45);border-radius:10px;padding:.5rem .85rem;font:600 1rem system-ui,sans-serif;cursor:pointer}.ds-toggle:hover{background:#123d5c}.ds-toggle:focus-visible{outline:3px solid #f6c945;outline-offset:2px}"
+    },
+    {
+      "name": "Follow-up Suggestion",
+      "kind": "chip",
+      "refersTo": "chip-follow-up",
+      "description": "Claude's suggested next question; inert text, tapping asks it.",
+      "html": "<button class=\"ds-follow\">What happens if I lose a Gym battle?</button>",
+      "css": ".ds-follow{min-height:40px;font:550 .875rem system-ui,sans-serif;color:#123d5c;background:#e3eef6;border:1px solid #b9d2e6;border-radius:999px;padding:.4rem .9rem;cursor:pointer}.ds-follow:hover{background:#d2e4f1;border-color:#1b5680}.ds-follow:focus-visible{outline:3px solid #1b5680;outline-offset:2px}"
+    }
   ],
   "narrative": {
-    "northStar": "Field-guide evidence",
-    "overview": "An operating surface, not a game simulation or promotional page. A petrol shell, mint reference area, and white reading area separate the jobs. Native web controls and a compact system-sans hierarchy prioritize repeat lookup under ordinary indoor study lighting.",
-    "keyCharacteristics": ["Familiar form and expandable reference list.", "Citation selection opens and focuses the exact evidence.", "Textual state labels accompany every state color."],
-    "rules": [{"name": "The Evidence Rule", "body": "Related navigation never receives the label of a supporting answer citation.", "section": "colors"}],
-    "dos": ["Do retain source labels, line spans, and textual state names.", "Do render source content with safe text nodes and limited formatting.", "Do distinguish operational errors from unsupported rules."],
-    "donts": ["Don't turn the app into a game board or invent game-state controls.", "Don't hide unresolved rules behind confident-looking success styling."]
+    "northStar": "The Town Map guide",
+    "overview": "A rules chat set in the colours of a Pokémon region map. The sea-blue shell frames a pale land-green conversation ground. White guide bubbles carry the answers and sea-blue trainer bubbles carry the questions. Rulebook citations are sand-coloured signposts. A guide portrait from one Flaticon pack (Darius Dan, lineal colour) changes with the answer state. Pokéball means reading the rulebook or a failed answer, Pikachu means Claude is answering or answered with citations, Psyduck means an answer with no rulebook citation, Ditto means an unresolved conflict and Snorlax means a scope or privacy block. Every state is also named in text.\n\nThis is an Operate surface: a familiar chat layout comes first. The world supplies only colour, the portraits, the signpost chips and one signature move, the route map. Tapping a signpost opens the Rulebook map, lights its section stop in Pikachu yellow, and opens and focuses the exact passage.",
+    "keyCharacteristics": [
+      "Conversation thread with a composer docked at the bottom; the newest message is kept in view.",
+      "Sources ride on the answer they support, as signposts with tabular line numbers.",
+      "The rulebook map stays a click away and never dominates the page.",
+      "State stamps (pill headings) and portraits name every answer state; colour never carries it alone."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Rule",
+        "body": "Only supporting citations wear filled signposts. Follow-up suggestions are sea-tint question pills, never sources.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Red Rule",
+        "body": "Town Marker Red belongs to Ask. Errors use the separate error ink/ground pair.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "**Do** name every state in text next to its portrait and stamp colour.",
+      "**Do** keep sources attached to the answer they support and open them in the map, not a modal.",
+      "**Do** keep icons from the one stored Flaticon pack (Darius Dan, lineal colour), local under `web/icons/`, credited in the UI and README.",
+      "**Do** scroll only the thread; keep the top bar and dock fixed."
+    ],
+    "donts": [
+      "**Don't** hotlink icons or load fonts or other assets from third-party hosts.",
+      "**Don't** give follow-up suggestions or any non-citation the filled signpost of a supporting citation.",
+      "**Don't** use Town Marker Red for anything but Ask.",
+      "**Don't** turn the chat into a game board or invent game-state controls."
+    ]
   }
 }

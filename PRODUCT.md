@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Delegated by the build brief: choose the smallest maintainable local stack after inspecting the course starter. Python standard library server with static HTML/CSS/JavaScript; no installation or external services.
+Python standard-library server with static HTML/CSS/JavaScript; no application packages or build step. Every answer comes from Claude's Messages API, called server-side with claude-haiku-5-5; there is no offline answer mode.
 
 ## Users
 
@@ -24,7 +24,7 @@ Loopback-only local browser app. The game specification is a read-only input, no
 
 ## Capabilities and Constraints
 
-Credential-free extractive backend is explicitly allowed by the brief. Quotes must be labeled as quotes, with precise source sections. Rulebook and answer instructions remain replaceable. No deployment, login, vector service, runtime coding-model invocation, invented game rules, or live-game integration. English specification and English lexical retrieval; multilingual behavior is not promised.
+The deterministic retriever chooses the passages; Claude judges them and answers with citations, streamed, with follow-up context from the last few exchanges. Local guardrails answer overrides, opponent-secret requests and the registered conflict without a paid call. Generated text has precise source navigation and honest uncovered, unverified and withdrawn states. Rulebook and local screening instructions remain replaceable; the Claude safety instruction is server-side code. No deployment, login, vector service, runtime coding-account invocation, invented game rules, or live-game integration. English lexical retrieval; multilingual behavior is not promised.
 
 ## Evidence on Hand
 
@@ -43,4 +43,4 @@ The brief requires keyboard operation, readable source material, responsive desk
 
 ## Open Decisions
 
-The final exam rubric, any future generative backend, and any game-rule clarification remain undecided. No official brand assets or media were supplied; use text only.
+The final exam rubric and game-rule clarifications remain undecided. The approved generative model is claude-haiku-5-5; a usable user API key and genuine paid verification are prerequisites for claiming live readiness. No official brand assets were supplied. The user approved free Pokémon icons from Flaticon (https://www.flaticon.com/free-icons/pokemon), stored locally with the attribution Flaticon's free licence requires; no other media.

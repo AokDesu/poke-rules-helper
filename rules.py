@@ -1,4 +1,4 @@
-"""Deterministic lexical passage lookup, not semantic entailment or generation."""
+"""Deterministic passage retrieval and local guardrails. Claude judges the evidence."""
 from collections import Counter
 from dataclasses import asdict, dataclass
 from hashlib import sha256
@@ -34,9 +34,12 @@ def parse_passages(text, sections):
     def flush():
         nonlocal pending
         if pending and section in sections:
+            label = f"§{section} · {heading}" + (f" / {subsection}" if subsection else "")
+            fact = re.match(r"^(?:(?:-|\d+\.) )?\*\*([^*]+?):\*\*", pending[0])
+            if fact:
+                label += " / " + fact[1]
             passages.append(Passage(
-                f"s{section.replace(' ', '-')}-l{first}", section,
-                f"§{section} · {heading}" + (f" / {subsection}" if subsection else ""),
+                f"s{section.replace(' ', '-')}-l{first}", section, label,
                 "\n".join(pending), first, first + len(pending) - 1))
         pending = []
 
@@ -64,11 +67,23 @@ def parse_passages(text, sections):
                 if section in sections:
                     passages.append(Passage(
                         f"s{section.replace(' ', '-')}-l{n}", section,
-                        f"§{section} · {heading}" + (f" / {subsection}" if subsection else ""),
+                        f"§{section} · {heading}" + (f" / {subsection}" if subsection else "") + " / " + line.split("|")[1].strip(),
                         table_header + "\n" + line, table_start, n))
-        elif not line.strip() or line.startswith("```"):
+        elif not line.strip():
+            # A colon introduces the following list, even across a blank line.
+            # Keep the exact contiguous span so headings cannot replace their rules.
+            if pending and pending[-1].rstrip().endswith(":"):
+                pending.append(line)
+            else:
+                flush()
+        elif line.startswith("```"):
             flush()
         else:
+            # Split sibling named facts, not children of an introductory list.
+            if (re.match(r"^(?:-|\d+\.) \*\*[^*]+:\*\*", line) and pending
+                    and not (pending[0].rstrip().endswith(":")
+                             and not re.match(r"^(?:-|\d+\.) ", pending[0]))):
+                flush()
             if not pending:
                 first = n
             pending.append(line)
@@ -136,47 +151,57 @@ class Rulebook:
     def source(self, passage):
         return {**asdict(passage), "document": self.provenance["title"]}
 
-    def result(self, status, passages=(), related=(), note=None):
-        return {
-            "status": status, "backend": self.policy["backend"],
-            "message": self.policy["messages"][status], "note": note,
-            "quotes": [{"text": p.text, "citation": p.id} for p in passages],
-            "citations": [self.source(p) for p in passages],
-            "related": [self.source(p) for p in related],
-        }
+    def local(self, status, passages=(), note=None):
+        """A guardrail answer made without any paid request."""
+        return {"status": status, "message": self.policy["messages"][status], "note": note,
+                "citations": [self.source(p) for p in passages]}
 
-    def answer(self, question):
+    def screen(self, question):
+        """Bound the input; answer overrides, hidden-state requests and registered conflicts locally."""
         if not isinstance(question, str) or not question.strip():
             raise ValueError("Enter a rule question.")
         if len(question) > self.policy["max_question_length"]:
             raise ValueError(f"Keep questions to {self.policy['max_question_length']} characters.")
         plain = normalized(question)
-        # Defense in depth only: this backend cannot execute or obey user/document text.
-        if (re.search(r"\b(ignore|override|forget|disregard|bypass)\b.{0,100}\b(instruction|rule|system|previous|scope)", plain)
-                or re.search(r"\b(invent|pretend|roleplay|jailbreak|developer mode|system prompt)\b", plain)):
-            return self.result("boundary")
-        if (re.search(r"\b(show|reveal|list|tell|expose|infer|guess|give)\b", plain)
-                and re.search(r"\b(opponent|enemy|other player|rng|seed|deck order)\b", plain)
-                and re.search(r"\b(hidden|secret|inventory|holding|holds|hand|seed|order)\b", plain)):
-            return self.result("private")
+        if (re.search(r"\b(ignore|override|forget|disregard|bypass)\b.{0,100}\b(instruction|rule|system|previous|scope|prompt)", plain)
+                or re.search(r"\b(invent|pretend|roleplay|role-play|jailbreak|developer mode|system prompt)\b", plain)):
+            return self.local("boundary")
+        asks = re.search(r"\b(show|reveal|list|tell|expose|infer|guess|give|what|which)\b", plain)
+        opponent_secret = (re.search(r"\b(opponents?|enem(?:y|ies)|other players?|rivals?|ais?)\b", plain)
+                           and re.search(r"\b(hidden|hide|hides|hiding|secret|secretly|concealed|private|inventory|holding|holds|hands?)\b", plain))
+        game_secret = re.search(r"\b(rng|seed|deck order|draw order|next (?:event )?card)\b", plain)
+        if asks and (opponent_secret or game_secret):
+            return self.local("private")
         terms = set(self.tokens(question))
         for note, evidence in self.ambiguities:
             if set(note["all_terms"]) <= terms and set(note["any_terms"]) & terms:
-                return self.result("ambiguous", evidence, note=note["note"])
-        hits = self.search(question, 12)
-        if not hits or not terms:
-            return self.result("unsupported")
-        # Unknown concepts and disconnected sections must not become purported support.
-        # Accept only complete lexical coverage in ONE source section. Still quotes, never yes/no.
-        for section in dict.fromkeys(p.section for p in hits):
-            candidates, covered = [], set()
-            for passage in (p for p in hits if p.section == section):
-                contribution = terms & set(self.tokens(passage.text))
-                if contribution - covered:
-                    candidates.append(passage)
-                    covered |= contribution
-                if terms <= covered:
-                    return self.result("extracts", candidates)
-                if len(candidates) == 3:
-                    break
-        return self.result("unsupported", related=hits[:3])
+                return self.local("ambiguous", evidence, note["note"])
+        return None
+
+    def context(self, query, max_bytes, limit=20):
+        """Best-ranked passages within the byte budget.
+
+        A sparse match (a broad question such as "how do I play?") is filled with
+        each indexed section's opening passage, in document order, so the model
+        sees an outline of the whole game. A passage on one side of a registered
+        conflict brings every side and the editorial note, so the model sees the
+        whole conflict instead of half of it.
+        """
+        chosen, notes, used = [], [], 0
+        ranked = self.search(query, limit) if query.strip() else []
+        openers = list({p.section: p for p in reversed(self.passages)}.values())[::-1]
+        for passage in ranked + (openers if len(ranked) < limit // 2 else []):
+            if passage in chosen or len(chosen) >= limit:
+                continue
+            group, note = [passage], None
+            for candidate, evidence in self.ambiguities:
+                if passage in evidence:
+                    group, note = [p for p in evidence if p not in chosen], candidate
+            size = sum(len((p.label + p.text).encode("utf-8")) for p in group)
+            if used + size > max_bytes:
+                continue
+            chosen.extend(group)
+            used += size
+            if note is not None and note not in notes:
+                notes.append(note)
+        return chosen, [note["note"] for note in notes]

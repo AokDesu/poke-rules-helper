@@ -5,32 +5,30 @@ primary_target: "web/index.html"
 related_targets: ["web/styles.css","web/app.js"]
 ---
 
-# Rule-reference surface
+# Rules chat surface
 
-Mode: Operate, with supporting Read region. Explicit supplied brief substitutes for an interview: worker instructed to build autonomously, no new product choice required. Code-led; no image-generation tool available. All UI work uses openai-codex/gpt-6.1-sol. No separate finish worker/review round under direct-PR brief.
+Mode: Operate (chat task), with a Read region for source passages. Redesign: the user rejected the field-guide look and asked for a Pokémon-themed chatbot, not a static page. Firstmate's brief substitutes for the interview (crewmate cannot address the user); interface-only scope; Flaticon Pokémon icons stored locally with attribution; no third-party runtime requests. Code-led (no image generation).
 
-Grounded candidates in resonance order: lecture handout (explanatory hierarchy); tournament pairing sheet (precise row labels); lab notebook (observations separated from conclusions); library catalog (browse and query); field guide (named specimens with evidence beside them); campus timetable (compact factual bands); trading-card typography (recognizable game terminology without licensed art).
+Grounded candidates, resonance order: Game Boy dialogue box; Pokédex entry (literal reading); TCG card anatomy; Pokémon Center counter; Trainer Card and badge case; Game Boy instruction booklet; Kanto Town Map and route signposts. Seed 0ca0f043 assigns candidate 7: Town Map and route signposts.
 
-Seed 09d45a3a assigns candidate 5: field guide. Operate limit: borrow typography, palette, density, and a citation-to-source signature move only, never costume controls or navigation.
-
-Challenger verdicts, audience identification / product clarity:
-- Concourse board: declined / declined. Raise: stable source labels through every state.
-- Factory records catalog: declined / declined. Raise: each passage is individually addressable.
-- Airport wayfinding: declined / competitive. Raise: unmistakable primary action and source-return path.
-- High-density Japanese web: competitive / declined. Raise: compact reference rows without tiny text.
-- Orienteering: competitive / declined. Raise: selecting a citation marks its exact evidence.
-- Character catalog: declined / declined. Raise: clear reusable family of source entries, no mascots or copyrighted art.
+Challenger verdicts (audience identification / product clarity) and raises:
+- Vertical video feed: declined / declined. Raise: the next questions are already waiting under the welcome message.
+- Terminal yellow wayfinding: declined / competitive. Raise: the followed citation stays marked on the map until another is chosen.
+- Dark developer console: declined / declined. Raise: Clear conversation sits apart from Send.
+- Acetate manual tab rail: declined / declined. Raise: each section stop states its passage count.
+- Jet-age ticket wallet: declined / declined. Raise: answer states are stamped on the message and never disappear.
+- Split-flap concourse: declined / declined. Raise: fixed tabular line numbers on every citation.
 
 ## Direction contract
 
-THESIS: A rule question and its evidence belong side by side. Reject the chat-only feed that hides sources below a generic answer.
+THESIS: Asking a rule is talking to a guide who points at the signpost. Refuse the grey-bubble chatbot clone and the Pokéball costume page.
 
-OWN-WORLD: Field-guide ink translated to a deep petrol shell, cool mint reference region, white reading surface, violet citation links, and ochre unresolved states. System sans; square-edged lists with restrained 6px control corners.
+OWN-WORLD: Town Map colours: deep sea-blue shell, pale land-green conversation ground, white guide bubbles, sea-blue trainer bubbles, sand signpost citation chips with brown lettering and line numbers, town-red Send marker, Pikachu-yellow "you are here" stop. Darius Dan Pokémon icons as guide avatars that change with the answer state. System sans; 14px bubble radius, pill chips.
 
-STORY: Ask a question; see explicitly labeled quotations or a missing-rule boundary; inspect the cited section and original line span. No generated interpretation implied.
+STORY: Ask, watch the guide read the rulebook, see Claude's answer stream in, then read it checked with numbered signposts; tap a signpost to see the exact passage on the route map, or tap a suggested follow-up that builds on the conversation. Uncovered, conflict and scope answers say so plainly.
 
-FIRST VIEWPORT: Compact product header and truthful offline badge. Two work areas: wider conversation left with ordinary/unsupported/ambiguity/override starter questions, narrower searchable source index right. Composer stays after the conversation. Mobile stacks both work areas without clipping or a separate navigation model.
+FIRST VIEWPORT: Sea-blue top bar: title, backend status, Rulebook map toggle. Centred conversation column with the guide's welcome and suggested questions; composer docked at the bottom with key/cost status line, Clear, textarea and red Ask. Map drawer closed until opened or a citation is tapped; side panel on desktop, sheet on mobile.
 
-FORM: Familiar web form, buttons, search input, expandable source passages, semantic message articles. Density supports reading rather than a decorative game board.
+FORM: Chat thread of semantic articles, streamed draft replaced by the checked answer, follow-up pills, textarea, buttons, details/summary passages grouped under section stops on a vertical route line.
 
-SIGNATURE: A citation opens, highlights and focuses the exact source entry; matching line labels bind quotation and source. Same affordance works on mobile. Respect reduced motion. Seed: 09d45a3a.
+SIGNATURE: Tapping a signpost chip opens the route map, lights its section stop yellow, opens and focuses the exact passage; reduced motion drops the pulse and the Pokéball thinking wobble.

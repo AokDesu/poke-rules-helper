@@ -1,102 +1,223 @@
 ---
 name: Poke Monopoly Rules Helper
-description: A local rule reference with evidence beside the question
+description: A Pokémon-flavoured rules chat whose guide points at the exact rulebook signpost
 colors:
-  ink: "#172f35"
-  muted: "#496168"
-  shell: "#123f48"
-  shell-muted: "#bedde0"
-  ground: "#edf3f2"
+  sea: "#1b5680"
+  sea-deep: "#123d5c"
+  sea-tint: "#e3eef6"
+  sea-text: "#eef5fa"
+  sea-muted: "#bcd4e6"
+  land: "#edf4e6"
+  land-deep: "#dbe8cf"
+  land-line: "#c3d4b4"
   paper: "#ffffff"
-  reference: "#e1eeea"
-  line: "#b6cbc7"
-  primary: "#195e58"
-  primary-hover: "#10463f"
-  citation: "#653f8c"
-  warning-ink: "#66430c"
-  warning-ground: "#fcf0d1"
+  ink: "#1b2a33"
+  muted: "#4d5f6b"
+  sign: "#f4e6bb"
+  sign-edge: "#b8933f"
+  sign-ink: "#4c3810"
+  marker: "#cc3324"
+  marker-deep: "#a3261a"
+  spark: "#f6c945"
+  warning-ink: "#6a4806"
+  warning-ground: "#fcefc7"
+  conflict-ink: "#57347f"
+  conflict-ground: "#efe6fa"
+  block-ink: "#2b5059"
+  block-ground: "#e0edef"
   error-ink: "#8a262c"
   error-ground: "#ffebea"
+  ok: "#7fd3a6"
 typography:
   title:
     fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: "-0.025em"
-  section:
     fontSize: "1.125rem"
     fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: "-0.02em"
+  greeting:
+    fontSize: "1.25rem"
+    fontWeight: 700
     lineHeight: 1.3
+    letterSpacing: "-0.02em"
   body:
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.55
   passage:
-    fontSize: "0.875rem"
+    fontSize: "0.9375rem"
     fontWeight: 400
     lineHeight: 1.55
+  label:
+    fontSize: "0.8125rem"
+    fontWeight: 650
+    lineHeight: 1.3
+  fine:
+    fontSize: "0.75rem"
+    fontWeight: 400
+    lineHeight: 1.5
 rounded:
-  control: "6px"
+  bubble: "14px"
+  bubble-tail: "4px"
+  control: "10px"
+  quote: "12px"
+  stop: "4px"
+  pill: "999px"
 spacing:
-  small: "8px"
-  medium: "16px"
-  region: "24px"
-  reading: "32px"
+  tight: "8px"
+  group: "12px"
+  message: "20px"
+  column: "820px"
 components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
+  bubble-guide:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.bubble}"
+    padding: "0.9rem 1.1rem"
+  bubble-trainer:
+    backgroundColor: "{colors.sea}"
+    textColor: "{colors.sea-text}"
+    rounded: "{rounded.bubble}"
+    padding: "0.7rem 1rem"
+  button-send:
+    backgroundColor: "{colors.marker}"
     textColor: "{colors.paper}"
-    rounded: "{rounded.control}"
-    padding: "0.55rem 0.85rem"
-  button-primary-hover:
-    backgroundColor: "{colors.primary-hover}"
+    rounded: "{rounded.bubble}"
+    height: "52px"
+  button-send-hover:
+    backgroundColor: "{colors.marker-deep}"
     textColor: "{colors.paper}"
+  chip-signpost:
+    backgroundColor: "{colors.sign}"
+    textColor: "{colors.sign-ink}"
+    rounded: "{rounded.pill}"
+    padding: "0.35rem 0.85rem 0.35rem 0.6rem"
+  chip-follow-up:
+    backgroundColor: "{colors.sea-tint}"
+    textColor: "{colors.sea-deep}"
+    rounded: "{rounded.pill}"
+    padding: "0.4rem 0.9rem"
+  stamp-default:
+    backgroundColor: "{colors.sea-tint}"
+    textColor: "{colors.sea-deep}"
+    rounded: "{rounded.pill}"
+  topbar:
+    backgroundColor: "{colors.sea}"
+    textColor: "{colors.sea-text}"
 ---
 
 # Design System: Poke Monopoly Rules Helper
 
 ## Overview
 
-**Creative North Star: "Field-guide evidence"**
+**Creative North Star: "The Town Map guide"**
 
-An operating surface, not a game simulation or promotional page. A petrol shell, mint reference area, and white reading area separate the jobs. Native web controls and a compact system-sans hierarchy prioritize repeat lookup under ordinary indoor study lighting.
+A rules chat set in the colours of a Pokémon region map. The sea-blue shell frames a pale land-green conversation ground. White guide bubbles carry the answers and sea-blue trainer bubbles carry the questions. Rulebook citations are sand-coloured signposts. A guide portrait from one Flaticon pack (Darius Dan, lineal colour) changes with the answer state. Pokéball means reading the rulebook or a failed answer, Pikachu means Claude is answering or answered with citations, Psyduck means an answer with no rulebook citation, Ditto means an unresolved conflict and Snorlax means a scope or privacy block. Every state is also named in text.
+
+This is an Operate surface: a familiar chat layout comes first. The world supplies only colour, the portraits, the signpost chips and one signature move, the route map. Tapping a signpost opens the Rulebook map, lights its section stop in Pikachu yellow, and opens and focuses the exact passage.
 
 **Key Characteristics:**
-- Familiar form and expandable reference list.
-- Citation selection opens and focuses the exact evidence.
-- Textual state labels accompany every state color.
+- Conversation thread with a composer docked at the bottom; the newest message is kept in view.
+- Sources ride on the answer they support, as signposts with tabular line numbers.
+- The rulebook map stays a click away and never dominates the page.
+- State stamps (pill headings) and portraits name every answer state; colour never carries it alone.
 
 ## Colors
 
-Primary green identifies actions and resolved reference selection. Violet binds quotations to source controls. Ochre marks unresolved rules; red marks operational failures. Cool neutral surfaces separate conversation and reference without shadows.
+A committed map palette: sea for the shell and the trainer, land for the ground, sand for signposts, town red for the one primary action, and Pikachu yellow for "you are here".
 
-**The Evidence Rule.** Related navigation never receives the label of a supporting answer citation.
+### Primary
+- **Map Sea** (#1b5680): top bar, trainer bubbles, focus rings, stop outlines, suggestion labels.
+- **Town Marker Red** (#cc3324): the Ask button only. Deepens to #a3261a on hover.
+
+### Secondary
+- **Signpost Sand** (#f4e6bb, edge #b8933f, lettering #4c3810): citation chips and their post dot.
+- **Pikachu Spark** (#f6c945): current route stop, selected passage outline, map toggle mark, text selection.
+
+### Tertiary (state grounds)
+- **Uncited** amber (#6a4806 on #fcefc7): no-citation stamp, uncited generated text, the unverified note.
+- **Conflict** violet (#57347f on #efe6fa): conflict stamp and editorial note.
+- **Blocked** slate teal (#2b5059 on #e0edef): scope and privacy stamps.
+- **Error** red (#8a262c on #ffebea): operational failures and retry.
+
+### Neutral
+- **Land** (#edf4e6): conversation ground. Land line (#c3d4b4) draws bubble and dock borders.
+- **Paper** (#ffffff): guide bubbles, dock, inputs.
+- **Ink** (#1b2a33) for body text; **Muted** (#4d5f6b) for secondary text on white or land.
+
+### Named Rules
+**The Evidence Rule.** Only supporting citations wear filled signposts. Follow-up suggestions are sea-tint question pills, never sources.
+
+**The One Red Rule.** Town Marker Red belongs to Ask. Errors use the separate error ink/ground pair.
 
 ## Typography
 
-One system family for operating controls and reading. The compact title/section hierarchy deliberately follows Operate guidance rather than enlarging headings to satisfy a marketing-page detector. Passage prose uses the passage role; labels and provenance are smaller but retain contrast. Source code notation alone uses monospace. No display typography or licensed game art.
+**Body Font:** system-ui stack (no web fonts; no third-party requests).
+
+**Character:** A workhorse UI sans with a firm weight ladder, sized for reading rules in a chat.
+
+### Hierarchy
+- **Title** (700, 1.125rem, 1.2, -0.02em): app name in the top bar; "Rules Helper" at 450 in Sea Muted.
+- **Greeting** (700, 1.25rem, 1.3): the guide's welcome heading.
+- **Body** (400, 1rem, 1.55): generated explanations and trainer questions, max about 66ch.
+- **Passage** (400, 0.9375rem): quoted rule text in answers; 0.875rem inside the map.
+- **Label** (650–700, 0.8125rem): stamps, stop names, chip text.
+- **Fine** (0.75rem): help line, answer meta (backend · method · tokens), credits. Never below 12px.
+
+Line numbers in chips, stop counts and map entries use tabular numerals.
 
 ## Layout
 
-A bounded workspace (1376px) uses two minmax columns, with wider conversation and narrower source library. At 850px it becomes one stacked column. At 420px the submit action spans the available width. Source scrolling is bounded to keep the composer usable. Quote prose has a 70ch maximum for surrounding explanation; table rows become labeled definition lists rather than overflowing pipe-delimited text.
+Full-height app shell (100dvh): top bar, then a stage. The conversation column is centred at 820px max with clamp(1rem, 3vw, 2rem) gutters. The thread scrolls on its own; the document never scrolls. The dock spans the column under a 1px land-line rule.
+
+Guide messages are a two-column grid: a 44px portrait, then the bubble. Trainer messages align right, at most min(560px, 85%). Messages are 20px apart.
+
+The Rulebook map opens as a right column, minmax(360px, 30vw), at 1024px and wider. Below that it becomes a full-screen sheet, and the conversation is made inert while it is open. At 560px and below the portrait shrinks to 34px, the toggle reads "Map", Clear reads "Clear", and the long help line is dropped from view (still referenced by aria-describedby).
 
 ## Elevation & Depth
 
-No shadows. Tonal regions and single-pixel divisions carry hierarchy. Focus uses a visible violet outline; selected evidence uses a green outline and pale ground. No decorative blur or motion.
+Flat, layered by tone and 1px lines. The one shadow is the portrait lift (`0 1px 3px rgba(18, 61, 92, .18)`), which separates the round icon from the land ground. Bubbles, dock and map use borders only.
 
 ## Shapes
 
-Small, consistent control corners from the control token. Source rows are unboxed disclosures separated by rules. Buttons retain native semantics and at least 44px height.
+Speech bubbles use a 14px radius with a 4px tail corner on the speaker's side. Controls and inputs use 10px; quotations 12px. Chips and stamps are pills. Route stops are 4px-rounded squares on a 4px sand rail.
 
 ## Components
 
-Primary buttons have readable hover, active, disabled, and loading states. Text fields have explicit labels, themed caret/selection, length boundaries, and keyboard submission. Source disclosures use native summaries; a citation opens the exact entry, clears conflicting filters, scrolls it into view, and transfers focus. Source-selection color settles once over 180ms only when reduced motion is not requested.
+### Composer dock
+- A status line states the key and cost truth (red when the key is missing, with setup steps) beside a quiet Clear button that sits apart from Ask. Then an auto-growing textarea (52–220px) and the red Ask button.
+- Enter sends; Shift+Enter adds a newline. While answering, the question, suggestions and follow-ups lock, and the button reads "Answering…".
+
+### Thinking and streaming messages
+- First a guide bubble with the Pokéball portrait and a CSS Pokéball, "Reading the rulebook…". Both wobble like a catch attempt (1.6s, rotate ±16°) when reduced motion is not requested.
+- When text arrives it becomes a Pikachu bubble stamped "Claude is answering…", with the text growing behind a sea-blue block caret (blinking only without reduced motion) and the note "Citations are checked when the answer finishes."
+- The checked answer replaces the draft in place. A failed check replaces it with an error bubble that leads with "Answer withdrawn:".
+
+### Answer bubble
+- State stamp, then the generated prose, then numbered signposts, then **Ask next** follow-up pills under a 1px rule. A dashed rule precedes the meta line: policy message · backend · returned model · usage.
+- Uncited generated chunks are amber `mark`s with an explicit unverified note. Numbered sup references map only to their own chunk.
+- Guardrail answers show their message, the conflict note when there is one, and any passages as quotations with signposts; the meta line says "Local guardrail · no Claude request made".
+
+### Signpost chip
+- Sand pill with a dark post dot, the section label, and a divider before tabular "L143" or "L149–157". It opens the map and focuses the passage. The aria-label keeps the full "lines X to Y".
+
+### Rulebook map
+- Sticky head (title, Full document, Close map), provenance, search, live count. Passages are grouped under section stops on a vertical route rail with passage counts. Each passage is a native details/summary with its sub-label (or a text preview) and its line span. The current stop fills yellow; the selected passage gets a yellow outline and a pale yellow ground. Escape closes the map and returns focus to the toggle.
+
+### Suggestions and follow-ups
+- Inside the welcome bubble: full-width outlined buttons with a small sea label and the question.
+- After an answer: sea-tint pills (#e3eef6, border #b9d2e6, text #123d5c) holding Claude's suggested questions as inert text; tapping one asks it.
 
 ## Do's and Don'ts
 
-- Do retain source labels, line spans, and textual state names.
-- Do render source content with safe text nodes and limited formatting.
-- Do distinguish operational errors from unsupported rules.
-- Don't turn the app into a game board or invent game-state controls.
-- Don't hide unresolved rules behind confident-looking success styling.
+### Do:
+- **Do** name every state in text next to its portrait and stamp colour.
+- **Do** keep sources attached to the answer they support and open them in the map, not a modal.
+- **Do** keep icons from the one stored Flaticon pack (Darius Dan, lineal colour), local under `web/icons/`, credited in the UI and README.
+- **Do** scroll only the thread; keep the top bar and dock fixed.
+
+### Don't:
+- **Don't** hotlink icons or load fonts or other assets from third-party hosts.
+- **Don't** give follow-up suggestions or any non-citation the filled signpost of a supporting citation.
+- **Don't** use Town Marker Red for anything but Ask.
+- **Don't** turn the chat into a game board or invent game-state controls.
