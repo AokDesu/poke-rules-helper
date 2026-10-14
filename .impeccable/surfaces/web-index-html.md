@@ -27,9 +27,9 @@ THESIS: A rule question and its evidence belong side by side. Reject the chat-on
 
 OWN-WORLD: Field-guide ink translated to a deep petrol shell, cool mint reference region, white reading surface, violet citation links, and ochre unresolved states. System sans; square-edged lists with restrained 6px control corners.
 
-STORY: Ask a question; see explicitly labeled quotations or a missing-rule boundary; inspect the cited section and original line span. No generated interpretation implied.
+STORY: Explicitly select Offline quotations or Live Claude explanations; ask a question; inspect cited sections and original line spans. Generated interpretations are labeled for review, uncited text is unverified, and known source gaps/conflicts remain unresolved.
 
-FIRST VIEWPORT: Compact product header and truthful offline badge. Two work areas: wider conversation left with ordinary/unsupported/ambiguity/override starter questions, narrower searchable source index right. Composer stays after the conversation. Mobile stacks both work areas without clipping or a separate navigation model.
+FIRST VIEWPORT: Compact product header names the selected backend/model, with truthful key-missing status. A native Answer mode selector states credential/cost behavior. Two work areas: wider conversation left with ordinary/unsupported/ambiguity/override starter questions, narrower searchable source index right. Composer stays after the conversation. Mobile stacks both work areas without clipping or a separate navigation model.
 
 FORM: Familiar web form, buttons, search input, expandable source passages, semantic message articles. Density supports reading rather than a decorative game board.
 

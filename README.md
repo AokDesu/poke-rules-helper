@@ -1,10 +1,10 @@
 # Poke Monopoly Rules Helper
 
-A local, credential-free rule-reference chatbot for CSC493 preparation. Ask a question, read **explicitly labeled rulebook quotations**, and open their supporting section/line spans. Includes a searchable source library and demo questions for ordinary rules, unsupported inventions, a source conflict, and instruction overrides.
+A loopback-only rule-reference chatbot for CSC493 preparation. Choose **offline quotations** or **Claude Haiku 5.5 explanations**, inspect supporting section/line references, and search the same labeled source library. Known source gaps and the Price Shield conflict remain unresolved in either mode.
 
 ## Start
 
-Requirements: Python 3.11+ and a modern browser. No packages, model downloads, API keys, accounts, or build step.
+Requirements: Python 3.11+ and a modern browser. The application uses only Python's standard library: no package installation, model download, or build step. Live mode additionally needs internet access and your own Claude API key; offline mode needs neither.
 
 ```sh
 python3 app.py
@@ -16,21 +16,45 @@ Open **http://127.0.0.1:4930**. Stop with Ctrl+C. If that port is busy:
 python3 app.py --port 4931
 ```
 
-The server binds **127.0.0.1 only**; it cannot be configured for public binding. Do not expose it through a reverse proxy. Chat stays in browser memory, is not logged or stored, and disappears on reload or Clear conversation. Every question is independent: name the relevant item or rule instead of asking conversational follow-ups.
+The server binds **127.0.0.1 only**; it cannot be configured for public binding. Do not expose it through a reverse proxy. Chat stays in browser memory, is not logged or stored locally, and disappears on reload or Clear conversation. **Live mode sends the current question and bounded retrieved passages to Anthropic**; provider retention/account policies still apply. Every question is independent: name the relevant item or rule instead of asking conversational follow-ups. No chat history or full source snapshot is sent.
+
+## Private live-mode setup
+
+Use the standard **server-side** `ANTHROPIC_API_KEY` environment variable, or the optional `.env` **beside `app.py`**:
+
+```sh
+cp .env.example .env
+chmod 600 .env
+# Edit .env privately in your local editor. Set ANTHROPIC_API_KEY to your API key.
+python3 app.py --mode live
+```
+
+Never paste a key into the browser, a command argument, a screenshot, an issue, or a commit. `.env` and `.env.*` are Git-ignored (except the key-free `.env.example`); static serving uses an explicit three-file allowlist, not the project directory. The local file accepts one `ANTHROPIC_API_KEY=value` assignment, optional enclosing quotes, blank lines and comments. It is not executed as shell code. A nonempty environment variable takes precedence. Restart after changing credentials. Only these two locations are consulted; coding-account credentials are never discovered or reused.
+
+`python3 app.py` initially selects **Offline** even when a key exists. `--mode live` initially selects **Live**; the browser's **Answer mode** control can explicitly change modes for later questions. Previous answers retain their backend labels. Merely configuring a key does not verify it. Missing keys, rejected credentials, timeouts, rate/account limits, invalid citations, refusals and incomplete responses are errors—not extractive answers disguised as live success. Retrying is manual and may incur another charge. There is no browser key-entry form.
+
+### Model and budget limits
+
+The only paid model is **`claude-haiku-5-5`**, using the [Messages API](https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide) with adaptive thinking, low effort, and **800 output tokens total**, including thinking. No legacy sampling parameters, tools, paid ranker, hidden retries, or more-expensive model switch. At most **3 retrieved passages / 12,000 UTF-8 bytes** of source text plus labels are submitted; oversized context is rejected before calling Claude. The question ceiling remains 1,200 characters. One paid request can be in flight per server process.
+
+[Published Haiku 5.5 pricing](https://platform.claude.com/docs/en/models/haiku-5-5/overview) for prompts below 100,000 tokens: **$0.10 per million input tokens and $0.50 per million output tokens**. For illustration, 4,000 input + 800 output tokens costs about **$0.0008** at those rates. This is an estimate, not a measured credit balance; actual input usage includes provider citation overhead. Successful responses show the returned model and input/output token usage. Failed requests may still be billed.
+
+The reported **$5 budget is not an application-enforced account-wide hard cap**. Context/output ceilings reduce per-request cost but do not bound the number of questions, other processes or other account spending. Check credits, usage, and any account/project spending controls in the Claude Console. Select Offline to avoid paid calls. There is no startup verification call or background paid activity.
 
 ## What the backend actually does
 
-**Offline extractive lookup, not an LLM.** Python standard-library BM25 lexical retrieval ranks small source passages. Conservative lexical coverage must fit within one source section before the app offers quotations. It selects only passages contributing query terms. It never produces free-form game rulings, general-knowledge answers, simulated game outcomes, or yes/no confirmation of a question's premise.
+**Shared deterministic retrieval.** Python standard-library BM25 lexical retrieval ranks small source passages. Conservative lexical coverage must fit within one source section before an ordinary question is admitted; only passages contributing query terms are selected. There is no separate model ranker/router. Unknown wording can return “not established” even when the full source contains an answer; narrow the query or browse the library.
 
-- **Rulebook extracts:** relevant exact quotations with clickable section/line citations. Read the passage's conditions; lexical matching is not semantic entailment.
-- **Not established:** no answer quotations or supporting citations. Related passages may be shown in a separately labeled navigation list. Sharing “coins”, “Pokémon”, or “Start” does not make an invented rule supported.
-- **Unresolved conflict:** both conflicting source passages and a clearly labeled editorial conflict note, without selecting a house rule. The currently registered conflict is Price Shield: §4.6 says a whole hostile action is blocked, while Appendix A describes only PvP coin loss. This is not an automatic detector of every ambiguity.
-- **Scope / privacy boundary:** no instruction overrides or opponent-secret requests. There is no live-game connection and no endpoint accepting game state.
-- **Failure:** failed requests keep the question for retry; missing or invalid source/config files prevent startup instead of fabricating success.
+- **Offline extracts:** exact quotations with clickable section/line citations; never generated rulings or yes/no confirmation of a premise. Lexical matching is not semantic entailment.
+- **Live explanation:** Claude receives only the admitted retrieved passages and the current question. [Provider-native citations](https://platform.claude.com/docs/en/build-with-claude/citations) use one custom content block per passage. The server validates document/block indices and exact cited text against the submitted passages, ignores provider-supplied titles, and derives navigation from the local source library. Invalid/missing citations reject the generated response. Valid pointers are **not proof of semantic correctness**; generated text is labeled for review and uncited portions are explicitly unverified.
+- **Not established:** no answer quotations or supporting citations. Related passages are separately labeled navigation, not support for a premise. Detected gaps are answered locally in Live too, with **“no Claude request made”**—not after a provider failure.
+- **Unresolved conflict:** both conflicting passages and an editorial note without choosing a house rule. The registered Price Shield conflict is §4.6's whole hostile action versus Appendix A's PvP coin loss. Both modes preserve the registered question-triggered conflict locally without a paid call. Live additionally withholds generation whenever a selected passage is part of that registered conflict, including a generic “What is Price Shield?” question, rather than sending only one side. This is not a detector of every ambiguity.
+- **Scope / privacy boundary:** obvious overrides and opponent-secret requests are refused locally. No game-state input or live-game connection exists.
+- **Failure:** the question and selected mode are preserved; explicitly choose Offline or retry manually. Missing/invalid source/config files prevent startup instead of fabricating success.
 
-User text and document text are data. No text is executed and no document directives become assistant instructions. Questions are plain text; source passages use safe text nodes with limited bold/code formatting and labeled table fields, never document-supplied HTML. Obvious override phrasing is screened, but safety does not depend on a complete list of phrases: this backend has no generative execution or game actions. Host/Origin checks and same-origin browser policy limit cross-site access to the local server.
+User and retrieved document text are untrusted data, not authority to change the application's scope. Obvious override phrasing is screened before a paid call, and the Claude system instruction requires source-only answers, honest uncertainty, and no hidden-state inference. These controls are not a proof that a generative model cannot make a mistake. Generated text uses inert text nodes, never HTML or model-supplied links; source passages use limited safe bold/code formatting and labeled table fields. Related navigation never becomes answer support.
 
-English-only lexical matching with a small editable synonym list. Unknown wording can conservatively return “not established” even when the full rulebook contains an answer; use a narrower query or the source search. It does not calculate odds or prices, translate Thai, infer unstated interactions, or settle source omissions. Only one honest mode is implemented; there are no misleading open/strict/labeled switches and no optional paid backend.
+Host/Origin checks, same-origin browser policy, loopback binding and fixed static routes remain in place. Claude requests go only to the fixed HTTPS Messages endpoint without redirects, environment proxies or retries. Keys are held server-side, never returned in metadata; raw provider errors are discarded for actionable redacted messages. API mode is explicit, not automatically chosen by key availability.
 
 ## Sources and provenance
 
@@ -62,10 +86,8 @@ Keep source changes separate from code:
 
 1. Replace `data/rulebook.md` with the authorized UTF-8 Markdown rulebook. Numeric `##`/`###` section headings and `## Appendix A` labels are recognized. Paragraphs, grouped bullets, and individual table rows become passages.
 2. Update `data/provenance.json`: title, original source path, indexed section labels, status, and `snapshot_sha256`. Compute the new digest with `sha256sum data/rulebook.md`. Startup rejects a stale digest.
-3. Update `data/answer-policy.json`: truthful response instructions/messages, synonyms, question stopwords, demo questions, and editorial ambiguity notes. Each evidence selector uses `section` and `contains`, plus optional `label_contains` to distinguish, for example, an item rule from the same name in a class table. Remove/update old selectors after a source change; startup rejects missing or nonunique evidence rather than publishing broken citations. Notes are human-authored metadata, not invented rules.
+3. Update `data/answer-policy.json`: offline/backend labels, local screening messages, synonyms, question stopwords, demo questions, and editorial ambiguity notes. Each evidence selector uses `section` and `contains`, plus optional `label_contains` to distinguish, for example, an item rule from the same name in a class table. Remove/update old selectors after a source change; startup rejects missing or nonunique evidence rather than publishing broken citations. Notes are human-authored metadata, not invented rules. The live source-only safety instruction is `SYSTEM` in `claude.py`; changing exam-specific generated-answer instructions requires reviewing that server-side instruction and re-verifying grounding.
 4. Restart `python3 app.py` and exercise the demo questions. You may instead keep a complete replacement folder outside this project and run `python3 app.py --data-dir /absolute/path/to/replacement-data`.
-
-Do not label an extractive backend as generated AI text or add a mode it does not implement. Any future generative backend must be a separate, deliberate decision with explicit credentials and errors—not a coding-account token fallback.
 
 ## Demo questions
 
@@ -85,14 +107,17 @@ Enter sends a question; Shift+Enter inserts a newline. Tab reaches inputs, sampl
 
 ```sh
 python3 -m unittest discover -s tests -v
-python3 -m py_compile app.py rules.py
+python3 -m py_compile app.py rules.py claude.py
 node --check web/app.js
+node --check tests/browser-checks.js
 ```
 
-Regression tests use isolated synthetic rulebooks and cover relevant citations, overlapping-vocabulary inventions, disconnected evidence, conflicting rules, document instruction exclusion, source replacement, stale provenance, missing ambiguity evidence, hidden-state requests, and malformed input. They do not depend on a mutable production source sentence or lexical ranking score.
+Regression tests use isolated synthetic rulebooks and cover existing retrieval/provenance behavior plus missing credentials, explicit mode selection, provider-error redaction, no paid retries/fallback, scope/conflict screening, oversized context, overlapping requests, valid native source navigation, invented/malformed citation rejection, refusal/truncation, and credential reflection.
 
-Then run the actual application with `python3 app.py` and use the demo questions in the browser. Inspect desktop and mobile, expand a citation, search for `catch`, search for `notaword`, clear the conversation, and verify a failed request can be retried. Browser evidence for this build is retained outside the repository in the supervising task's data folder; it is not shipped as application content.
+For browser regressions, start the app and use `chrome-devtools-axi open http://127.0.0.1:4930`, then pass the contents of `tests/browser-checks.js` to `chrome-devtools-axi eval`. It exercises synthetic hostile provider text, unknown citations, unverified text, loading, citation focus, mode transitions and clearing; it makes **zero paid requests** and is **not live proof**. Also inspect desktop/mobile and keyboard submission, source search and empty states.
+
+Genuine live verification requires your own usable key: select Live, ask “Does a failed catch still use a Ball?”, inspect the generated explanation and returned usage, click its §4.3 citation, and confirm the source opens/focuses. Check missing-key behavior with no credential, and Offline without credentials. Never call mocked-provider tests a successful paid smoke run. Private verification evidence stays outside the repository.
 
 ## Intentionally undecided
 
-The full CSC493 exam rubric has not been announced. This is advance preparation, not a claim of final-rubric compliance. New source material, required generation/model choices, rubric-specific evaluation, and game-author clarifications remain undecided. No deployment, login, vector database service, opponent AI implementation, or live-game integration is included.
+The full CSC493 exam rubric has not been announced. This is advance preparation, not a claim of final-rubric compliance. New source material, rubric-specific evaluation, and game-author clarifications remain undecided. No deployment, login, vector database service, opponent AI implementation, or live-game integration is included.

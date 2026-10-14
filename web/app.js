@@ -5,7 +5,9 @@ let asking = false;
 let searching = false;
 let sourceRequest = 0;
 let questionLimit = 1200;
-const headings = { extracts: "Rulebook extracts", unsupported: "Not established by the rulebook", ambiguous: "Unresolved rule conflict", boundary: "Instructions cannot change the scope", private: "Hidden information stays private" };
+let backendInfo;
+const sourceCatalog = new Map();
+const headings = { generated: "Claude explanation · review the sources", extracts: "Rulebook extracts", unsupported: "Not established by the rulebook", ambiguous: "Unresolved rule conflict", boundary: "Instructions cannot change the scope", private: "Hidden information stays private" };
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -41,16 +43,37 @@ function passageBody(text) {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(path, { ...options, signal: AbortSignal.timeout(10000) });
+  const response = await fetch(path, { ...options, signal: AbortSignal.timeout(path === "/api/ask" ? 45000 : 10000) });
   const body = await response.json();
   if (!response.ok) throw new Error(body.error || `Request failed (${response.status}).`);
   return body;
 }
 
+function selectedMode() {
+  return $("#answer-mode").value;
+}
+
+function updateMode() {
+  if (!backendInfo) return;
+  const live = selectedMode() === "live";
+  const missing = live && !backendInfo.live.key_configured;
+  $("#backend-label").textContent = `${backendInfo.backends[selectedMode()]}${missing ? " · key missing" : ""}`;
+  $(".backend").dataset.state = missing ? "missing" : "ready";
+  $("#mode-help").classList.toggle("missing", missing);
+  $("#mode-help").textContent = !live
+    ? "Offline quotations only. No credentials needed and no paid requests."
+    : missing
+      ? "Key missing. Set ANTHROPIC_API_KEY privately in the server environment or local .env, then restart. Nothing is sent until a key is configured."
+      : `Credential configured, not verified. Eligible questions send retrieved passages to Claude, up to ${backendInfo.live.max_output_tokens} output tokens. Paid requests; no automatic retries or offline fallback.`;
+  $("#welcome-copy").textContent = live
+    ? "Claude explains retrieved written rules with source references. Check the interpretation. Known conflicts and unsupported questions stay unresolved; no game state is connected."
+    : "This offline helper finds and quotes written rules. It does not generate rulings, track your game, or fill gaps with guesses.";
+}
 function updateControls() {
   $("#question").disabled = !ready || asking;
   $("#ask-button").disabled = !ready || asking;
-  $("#ask-button").textContent = asking ? "Finding passages…" : "Ask question";
+  $("#ask-button").textContent = asking ? (selectedMode() === "live" ? "Asking Claude…" : "Finding passages…") : "Ask question";
+  $("#answer-mode").disabled = !ready || asking;
   $("#clear-chat").disabled = asking || !$("#messages").childElementCount;
   $("#source-query").disabled = !ready;
   $("#search-button").disabled = !ready || searching;
@@ -58,9 +81,9 @@ function updateControls() {
   for (const button of $("#samples").querySelectorAll("button")) button.disabled = !ready || asking;
 }
 
-function showError(container, message, retry) {
+function showError(container, message, retry, label = "Try again") {
   container.replaceChildren(element("p", message));
-  const button = element("button", "Try again");
+  const button = element("button", label);
   button.type = "button";
   button.addEventListener("click", retry);
   container.append(button);
@@ -70,6 +93,7 @@ function showError(container, message, retry) {
 function renderSources(sources) {
   const fragment = document.createDocumentFragment();
   for (const source of sources) {
+    sourceCatalog.set(source.id, source);
     const details = element("details", undefined, "source-entry");
     details.id = source.id;
     const summary = element("summary", source.label);
@@ -136,6 +160,10 @@ function renderAnswer(result) {
   const article = element("article", undefined, `answer ${result.status}`);
   article.dataset.status = result.status;
   article.append(element("h3", headings[result.status] || "Rulebook response", "answer-heading"), element("p", result.message));
+  const method = result.response_method === "claude"
+    ? `Returned model: ${result.model} · ${result.usage.input_tokens} input / ${result.usage.output_tokens} output tokens`
+    : result.response_method === "policy" ? "Local scope / evidence screening · no Claude request made" : "Exact quotations · no API request";
+  article.append(element("p", `${result.backend} · ${method}`, "answer-meta"));
   if (result.note) article.append(element("p", result.note, "rule-note"));
   const citations = new Map(result.citations.map((source) => [source.id, source]));
   for (const quote of result.quotes) {
@@ -143,6 +171,20 @@ function renderAnswer(result) {
     if (!source) continue;
     const block = element("blockquote");
     block.append(passageBody(quote.text), sourceButton(source));
+    article.append(block);
+  }
+  for (const segment of result.segments || []) {
+    const block = element("div", undefined, "generated-segment");
+    // Provider-generated text is never parsed as HTML, Markdown links or controls.
+    block.append(element("p", segment.text, "generated-text"));
+    const list = element("div", undefined, "generated-citations");
+    for (const id of segment.citations) {
+      // Only the source library supplies navigation targets and labels.
+      const source = citations.has(id) && sourceCatalog.get(id);
+      if (source) list.append(sourceButton(source));
+    }
+    if (!list.childElementCount) block.append(element("p", "No supporting citation · this text is unverified.", "unverified"));
+    else block.append(list);
     article.append(block);
   }
   if (result.related.length) {
@@ -176,22 +218,27 @@ async function ask(question, existingTurn) {
     turn.querySelector(".error")?.remove();
   }
   $("#empty-chat").hidden = true;
+  const mode = selectedMode();
   asking = true;
   updateControls();
-  $("#chat-status").textContent = "Finding rulebook passages…";
+  $("#chat-status").textContent = mode === "live" ? "Checking scope and requesting Claude… A sent request may be billed even if the connection fails." : "Finding rulebook passages…";
+  $(".backend").dataset.state = "loading";
   $("#messages").setAttribute("aria-busy", "true");
   try {
-    const result = await request("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question }) });
+    const result = await request("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question, mode }) });
     turn.append(renderAnswer(result));
     $("#question").value = "";
-    $("#chat-status").textContent = `${headings[result.status]}. ${result.quotes.length} quoted ${result.quotes.length === 1 ? "passage" : "passages"}.`;
+    updateMode();
+    $("#chat-status").textContent = result.response_method === "claude" ? `${headings[result.status]}. ${result.citations.length} supporting source references.` : `${headings[result.status]}. No Claude request made.`;
   } catch (error) {
     const failure = element("div", undefined, "error");
     failure.setAttribute("role", "alert");
-    showError(failure, `No answer received: ${error.message} Check the local server, then retry.`, () => ask(question, turn));
+    showError(failure, `No ${mode === "live" ? "live" : "offline"} answer received: ${error.message}`, () => ask(question, turn), "Retry in selected mode");
+    $(".backend").dataset.state = "error";
+    $("#backend-label").textContent = `${backendInfo.backends[mode]} · request failed${mode === "live" && !backendInfo.live.key_configured ? " · key missing" : ""}`;
     turn.append(failure);
     $("#question").value = question;
-    $("#chat-status").textContent = "Request failed. Your question is kept for retry.";
+    $("#chat-status").textContent = `Request failed. Mode was not changed. Your question is kept.${mode === "live" ? " Retrying Live may incur another charge." : ""}`;
   } finally {
     asking = false;
     $("#messages").setAttribute("aria-busy", "false");
@@ -208,7 +255,9 @@ async function initialize() {
   $("#backend-label").textContent = "Connecting to local rulebook…";
   try {
     const info = await request("/api/info");
-    $("#backend-label").textContent = info.backend;
+    backendInfo = info;
+    $("#answer-mode").value = info.default_mode;
+    updateMode();
     $("#provenance").textContent = `${info.provenance.title}. ${info.provenance.status}`;
     questionLimit = info.max_question_length;
     $("#question").maxLength = questionLimit;
@@ -233,6 +282,10 @@ async function initialize() {
 }
 
 $("#ask-form").addEventListener("submit", (event) => { event.preventDefault(); ask($("#question").value); });
+$("#answer-mode").addEventListener("change", () => {
+  updateMode();
+  $("#chat-status").textContent = `Selected ${selectedMode() === "live" ? "Live Claude" : "Offline quotations"}. Previous responses are unchanged.`;
+});
 $("#question").addEventListener("input", () => $("#question").setCustomValidity(""));
 $("#question").addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); $("#ask-form").requestSubmit(); }

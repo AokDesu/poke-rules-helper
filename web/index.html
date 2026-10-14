@@ -24,9 +24,17 @@
         <button id="clear-chat" class="quiet" type="button" disabled>Clear conversation</button>
       </div>
       <div id="setup-error" role="alert" hidden></div>
+      <div class="mode-control">
+        <label for="answer-mode">Answer mode</label>
+        <select id="answer-mode" aria-describedby="mode-help" disabled>
+          <option value="offline">Offline · rulebook quotations</option>
+          <option value="live">Live · Claude Haiku 5.5</option>
+        </select>
+        <p id="mode-help" class="mode-help" role="status" aria-live="polite">Loading backend settings…</p>
+      </div>
       <div id="empty-chat" class="welcome">
         <h3>A rule reference, not a referee.</h3>
-        <p>This offline helper finds and quotes written rules. It does not generate rulings, track your game, or fill gaps with guesses.</p>
+        <p id="welcome-copy">Choose exact offline quotations or a Claude-generated explanation with source references. Neither mode tracks your game or fills rulebook gaps with guesses.</p>
         <p class="sample-label">Try a demo question</p>
         <div id="samples" class="sample-list" aria-label="Demo questions"><p class="muted">Loading questions…</p></div>
       </div>
@@ -40,7 +48,7 @@
           <button id="ask-button" class="primary" type="submit" disabled>Ask question</button>
         </div>
       </form>
-      <p class="fine-print">English lexical lookup. Each question is independent; include the rule or item name. A matching quotation is not proof of every premise.</p>
+      <p class="fine-print">English lexical retrieval in both modes. Each question is independent; include the rule or item name. A citation locates evidence, not proof of every premise or interpretation.</p>
     </section>
     <aside class="reference" aria-labelledby="source-heading">
       <div class="section-heading"><h2 id="source-heading">Source library</h2><a href="/rulebook.md" target="_blank" rel="noopener">Full document</a></div>
@@ -54,6 +62,6 @@
       <div id="source-list" class="source-list"></div>
     </aside>
   </main>
-  <footer>Local reference only <span>Specification baseline · not playtested · no official affiliation</span></footer>
+  <footer>Loopback-only app <span>Specification baseline · not playtested · no official affiliation</span></footer>
 </body>
 </html>

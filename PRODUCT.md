@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Delegated by the build brief: choose the smallest maintainable local stack after inspecting the course starter. Python standard library server with static HTML/CSS/JavaScript; no installation or external services.
+Python standard-library server with static HTML/CSS/JavaScript; no application packages or build step. Explicit Offline mode needs no external service. Explicit Live mode calls Claude's Messages API server-side using claude-haiku-5-5.
 
 ## Users
 
@@ -24,7 +24,7 @@ Loopback-only local browser app. The game specification is a read-only input, no
 
 ## Capabilities and Constraints
 
-Credential-free extractive backend is explicitly allowed by the brief. Quotes must be labeled as quotes, with precise source sections. Rulebook and answer instructions remain replaceable. No deployment, login, vector service, runtime coding-model invocation, invented game rules, or live-game integration. English specification and English lexical retrieval; multilingual behavior is not promised.
+Credential-free extractive lookup and deliberately selected Claude explanations share the deterministic retriever. Quotes and generated explanations have distinct labels, precise source navigation, and honest unresolved states. Rulebook and local screening instructions remain replaceable; the live safety instruction is server-side code. No deployment, login, vector service, runtime coding-account invocation, invented game rules, or live-game integration. English lexical retrieval; multilingual behavior is not promised.
 
 ## Evidence on Hand
 
@@ -43,4 +43,4 @@ The brief requires keyboard operation, readable source material, responsive desk
 
 ## Open Decisions
 
-The final exam rubric, any future generative backend, and any game-rule clarification remain undecided. No official brand assets or media were supplied; use text only.
+The final exam rubric and game-rule clarifications remain undecided. The approved generative model is claude-haiku-5-5; a usable user API key and genuine paid verification are prerequisites for claiming live readiness. No official brand assets or media were supplied; use text only.

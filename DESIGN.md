@@ -93,6 +93,8 @@ Small, consistent control corners from the control token. Source rows are unboxe
 
 Primary buttons have readable hover, active, disabled, and loading states. Text fields have explicit labels, themed caret/selection, length boundaries, and keyboard submission. Source disclosures use native summaries; a citation opens the exact entry, clears conflicting filters, scrolls it into view, and transfers focus. Source-selection color settles once over 180ms only when reduced motion is not requested.
 
+Answer mode uses a native, labeled select before the question area, locked during loading. The header always names the selected backend/model; credential-missing and operational-error indicators include text, not color alone. Each answer preserves its own backend and generation/screening method when the user changes modes. Claude prose is distinct from quotation blocks, with source controls beside supported segments and an ochre “unverified” label for uncited text. Provider failures retain the question and never switch modes.
+
 ## Do's and Don'ts
 
 - Do retain source labels, line spans, and textual state names.

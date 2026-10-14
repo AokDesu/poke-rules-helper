@@ -1,4 +1,4 @@
-"""One-command, dependency-free local web app. No credentials or outbound calls."""
+"""Loopback-only rule reference with explicit offline and server-side Claude modes."""
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 from urllib.parse import parse_qs, urlsplit
 
+from claude import BACKEND, MODEL, MAX_CONTEXT_BYTES, MAX_DOCUMENTS, MAX_OUTPUT_TOKENS, Haiku, LiveError, load_api_key
 from rules import ROOT, Rulebook
 
 
@@ -50,9 +51,13 @@ class Handler(BaseHTTPRequestHandler):
         route = urlsplit(self.path)
         book = self.server.book
         if route.path == "/api/info":
-            self.respond(200, {"backend": book.policy["backend"], "provenance": book.provenance,
-                               "passage_count": len(book.passages), "samples": book.policy["samples"],
-                               "max_question_length": book.policy["max_question_length"]})
+            self.respond(200, {"default_mode": self.server.default_mode,
+                               "backends": {"offline": book.policy["backend"], "live": BACKEND},
+                               "live": {"model": MODEL, "key_configured": bool(self.server.haiku.api_key),
+                                        "max_output_tokens": MAX_OUTPUT_TOKENS,
+                                        "max_context_bytes": MAX_CONTEXT_BYTES, "max_documents": MAX_DOCUMENTS},
+                               "provenance": book.provenance, "passage_count": len(book.passages),
+                               "samples": book.policy["samples"], "max_question_length": book.policy["max_question_length"]})
         elif route.path == "/api/sources":
             query = parse_qs(route.query).get("q", [""])[0]
             if len(query) > 1200:
@@ -84,9 +89,18 @@ class Handler(BaseHTTPRequestHandler):
                 self.respond(413, {"error": "Request must be between 1 and 8192 bytes."})
                 return
             body = json.loads(self.rfile.read(length))
-            if not isinstance(body, dict) or set(body) != {"question"}:
-                raise ValueError("Send only a question field; live game state is not accepted.")
-            result = self.server.book.answer(body["question"])
+            if not isinstance(body, dict) or set(body) != {"question", "mode"}:
+                raise ValueError("Send only question and mode fields; live game state is not accepted.")
+            if body["mode"] not in ("offline", "live"):
+                raise ValueError("Choose offline or live mode explicitly.")
+            if body["mode"] == "live":
+                result = self.server.haiku.answer(body["question"])
+            else:
+                result = {**self.server.book.answer(body["question"]), "mode": "offline",
+                          "model": None, "response_method": "extractive", "usage": None}
+        except LiveError as error:
+            self.respond(error.status, error.response())
+            return
         except (ValueError, UnicodeDecodeError) as error:
             self.respond(400, {"error": str(error) if not isinstance(error, json.JSONDecodeError) else "Invalid JSON."})
             return
@@ -100,18 +114,22 @@ def main():
     parser = argparse.ArgumentParser(description="Start the loopback-only Poke Monopoly rule-reference app.")
     parser.add_argument("--port", type=int, default=4930)
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data", help="Folder containing rulebook.md, provenance.json and answer-policy.json")
+    parser.add_argument("--mode", choices=("offline", "live"), default="offline", help="Initially selected browser mode (default: offline); never switches after a provider error")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
     try:
         book = Rulebook(args.data_dir)
+        api_key = load_api_key()
         server = LocalServer(("127.0.0.1", args.port), Handler)
     except (OSError, ValueError, KeyError) as error:
         print(f"Cannot start: {error}", file=sys.stderr)
         return 1
     server.book = book
+    server.haiku = Haiku(book, api_key)
+    server.default_mode = args.mode
     print(f"Poke Monopoly Rules Helper: http://127.0.0.1:{args.port}", flush=True)
-    print(f"{book.policy['backend']} | {len(book.passages)} labeled passages | Ctrl+C to stop", flush=True)
+    print(f"Default: {args.mode} | Live model: {MODEL} | Credential: {'configured (not verified)' if api_key else 'missing'} | {len(book.passages)} labeled passages | Ctrl+C to stop", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
