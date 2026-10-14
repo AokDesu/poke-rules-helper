@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Poke Monopoly · Rules Helper</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#question">Skip to question</a>
+  <header class="app-header">
+    <div>
+      <h1>Poke Monopoly <span>Rules Helper</span></h1>
+      <p>Ask a rule question. Read the evidence.</p>
+    </div>
+    <div class="backend"><span class="status-dot" aria-hidden="true"></span><span id="backend-label">Connecting to local rulebook…</span></div>
+  </header>
+  <main class="workspace">
+    <section class="conversation" aria-labelledby="chat-heading">
+      <div class="section-heading">
+        <h2 id="chat-heading">Ask the rulebook</h2>
+        <button id="clear-chat" class="quiet" type="button" disabled>Clear conversation</button>
+      </div>
+      <div id="setup-error" role="alert" hidden></div>
+      <div id="empty-chat" class="welcome">
+        <h3>A rule reference, not a referee.</h3>
+        <p>This offline helper finds and quotes written rules. It does not generate rulings, track your game, or fill gaps with guesses.</p>
+        <p class="sample-label">Try a demo question</p>
+        <div id="samples" class="sample-list" aria-label="Demo questions"><p class="muted">Loading questions…</p></div>
+      </div>
+      <div id="messages" aria-label="Conversation"></div>
+      <p id="chat-status" class="live-status" role="status" aria-live="polite"></p>
+      <form id="ask-form" class="composer">
+        <label for="question">Your rule question</label>
+        <textarea id="question" name="question" rows="3" maxlength="1200" placeholder="Does a failed catch still use a Ball?" required disabled></textarea>
+        <div class="composer-actions">
+          <p id="question-help">Enter to ask · Shift+Enter for a new line<br>No opponent secrets or live game data.</p>
+          <button id="ask-button" class="primary" type="submit" disabled>Ask question</button>
+        </div>
+      </form>
+      <p class="fine-print">English lexical lookup. Each question is independent; include the rule or item name. A matching quotation is not proof of every premise.</p>
+    </section>
+    <aside class="reference" aria-labelledby="source-heading">
+      <div class="section-heading"><h2 id="source-heading">Source library</h2><a href="/rulebook.md" target="_blank" rel="noopener">Full document</a></div>
+      <p id="provenance" class="source-meta">Loading source provenance…</p>
+      <form id="search-form" class="source-search">
+        <label for="source-query">Search sections and passages</label>
+        <div class="search-controls"><input id="source-query" type="search" maxlength="1200" placeholder="Try catch, Gym, or Price Shield" disabled><button id="search-button" type="submit" disabled>Search</button></div>
+      </form>
+      <p id="source-status" class="source-meta" role="status" aria-live="polite">Loading passages…</p>
+      <div id="source-error" role="alert" hidden></div>
+      <div id="source-list" class="source-list"></div>
+    </aside>
+  </main>
+  <footer>Local reference only <span>Specification baseline · not playtested · no official affiliation</span></footer>
+</body>
+</html>
